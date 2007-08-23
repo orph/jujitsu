@@ -162,14 +162,15 @@ final class PTextAreaRenderer {
         int yTop = y - metrics.getMaxAscent();
         int yBottom = y + metrics.getMaxDescent() - 1;
 
-        g.fillRect(x, yTop, 20, yBottom - yTop);
-
+        // NOTE: The rendering doesn't deal with this very well yet.
         /*
+        g.fillRect(x, yTop, 20, yBottom - yTop);
+        */
+
         g.drawLine(x, yTop + 1, x, yBottom - 1);
         g.drawLine(x, yTop + 1, x + 1, yTop);
         g.drawLine(x, yTop + 1, x - 1, yTop);
         g.drawLine(x, yBottom - 1, x + 1, yBottom);
         g.drawLine(x, yBottom - 1, x - 1, yBottom);
-        */
     }
 }

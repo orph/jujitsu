@@ -1,0 +1,8 @@
+2007-08-23  Alex Graveley  <alex@beatniksoftware.com>
+
+	* PTextAreaRenderer.java: Don't draw the cursor as a squre yet, go
+	back to using an 'I' for now.
+
+	First SVN Commit!
+
+

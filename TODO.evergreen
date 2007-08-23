@@ -1,0 +1,259 @@
+TODO list for Evergreen
+
+Add a field to "Add Workspace" so you can specify a build host. Any build
+commands are then prefixed with "ssh build-host ". Probably also need a way
+to edit a workspace's properties (which would sometimes have been useful
+previously, when a repository has changed location, or I've wanted to change
+its name).
+
+Title bar text:
+ 1. Don't show repository root prefix in title bars?
+ 2. Intelligently truncate titles too long for the title bar?
+
+Sort windows alphabetically?
+
+Subversion ignores the following by default; maybe we should hard-code
+something similar in Evergreen? I'd like to remove more of edit.properties,
+and at least only have it contain differences from some sensible default
+state, rather than be strictly necessary for a working Evergreen.
+# global-ignores = *.o *.lo *.la #*# .*.rej *.rej .*~ *~ .#* .DS_Store
+
+We should keep track of 'recent files' on a per-workspace basis. We
+should also use scm's ability to find what's modified in a repository (once
+it gains this ability) to be able to offer a list of modified files too.
+
+Thinking about the literal string/regular expression problem I just
+fixed with FindFilesContainingSelectionAction, we should have a text
+field capable of automatically coloring invalid regular expressions
+red, and offering an explanation for any status line that happens to
+be available. Or we should fix all the existing dialogs using normal
+text fields to be like the Find/Replace dialog, which is the one
+place we do this properly at the moment.
+
+Did you know that vim keeps a ~/.vim/backup/ directory, containing the
+equivalent of our .bak files?
+
+The completion should work for languages other than Java. We can collect
+all the identifiers from the current file and sort them, at the very
+least.
+
+spelling checking:
+ 1. add a way to show a short list of the misspelled words in the current file. and a way to add them to an exclusion list? or find/replace them?
+ 2. should we be less eager? have a timer so we don't literally check as you type each character? i think what i'd really like is two alpha values: one for misspelling-in-progress that's significantly lighter than finished-misspelling (which can be the same as what we're using at the moment), or some kind of scheme where alpha increases with age?
+ 4. instead of dumping everything in the known-bad hash, we should only pay attention to 'misspellings' left in files when they're written. the known-bad hash contains too many spellings-in-progress.
+
+symbolic links: given that we don't really (see FIXME in FileUtilities) recognize symbolic links properly, how about having "Add Workspace" automatically use the canonical path of whatever path you give it? though that might look ugly, and it is kind of doing exactly what someone's presumably trying to avoid by using a symbolic link: remembering a specific path that may change.
+
+Find/Replace:
+ 1. Find/Replace is broken for matches that span lines. (Try a find pattern that contains "\n", for example.) [there's also a file "find-test.txt".] Martin just successfully deleted whole lines matching " *MONK\n", although the Matches and Replacements boxes were empty. The problem being that we use the Pattern.MULTILINE flag; " *MONK$" would have looked right and worked. But this isn't generally true: "a\nb" is not the same as "a$b".
+ 2. Some way of marking submatch groups: the whole match is marked in red or blue, but it would be good to also see the submatches within that.
+ 4. Should be able to select matches/replacements, and only apply the selected ones.
+
+we've removed most uses of "new File" and FileUtilities.parseUserFriendlyName
+in favor of FileUtilities.fileFromString, but should probably have something
+similar in the other direction, where special JFilenameField components would
+let us always show the user-friendly forms.
+
+[ ] fix the fact that you can slide windows off the bottom of the column,
+    or behind the others at the bottom of a column.
+
+[ ] make use of the 'help' key on Apple desktop keyboards.
+
+[ ] opening files: say "if we don't find an exact match (i.e. a longest
+    common prefix that equals a workspace root), automatically create a new
+    workspace with [what? the longest common prefix?] as its root". the trouble,
+    as i've mentioned before, is that this doesn't do exactly what you want if
+    you open an unspecific file (~/edit.properties, say) and then go to a
+    more-specific file for which there's no better workspace
+    (~/Projects/rarely-used-project/, say).
+
+[ ] as a matter of interest, i accidentally opened 40 files on one workspace
+    yesterday. (i don't have a tall enough display for 40 titlebars.) Evergreen
+    didn't behave particularly gracefully, but it didn't spaz out in a
+    damaging way. i think we should refuse to open files on a workspace if
+    it's full.
+
+[ ] http://java.sun.com/products/jlf/at/book/Windows9.html says to position
+    dialogs "at the golden mean of the parent window". Centered horizontally,
+    and vertically n pixels below the top of the parent, where
+    
+        n = parentHeight - (parentHeight/1.618)
+
+    This only applies the first time the dialog is opened. Thereafter, it should
+    re-appear where it was when it was closed.
+
+auto-saving
+
+    [ ] Store divider position on quit. Restore on start.
+
+[ ] should have an environment variable editor (like the Windows Control
+    Panel one).
+
+[ ] We could support automatic "bk edit"ing of files using this command:
+
+        bk sfiles -v ValidDeque.h
+
+    Which produces:
+
+        l    SCCS/s.ValidDeque.h
+
+    Or:
+
+        u    SCCS/s.ValidDeque.cpp
+
+    The letters mean:
+
+                    l???   the file is locked
+                    u???   the file is unlocked
+                    jjjj   the file is junk
+                    xxxx   the file is an extra
+                    ?c??   the file is modified (changed)
+                    ??p?   the file has pending deltas
+
+    So "u" means that "bk edit" is necessary to edit it.
+
+        bk sfiles -v badger
+
+    Produces no output even when not in a bk work area.
+
+[ ] hungry delete should probably delete to the correct indentation position
+    for the line first. so
+
+    if (blah) {
+            something();
+    }
+
+    with the caret before the 's' of 'something' would first delete four
+    spaces to fix the indentation, and then, if you backspace again, delete
+    back up to the opening brace.
+
+[ ] Change the stream monitoring code to distinguish stdout from stderr;
+    get the errors windows to automatically close after a build if there
+    wasn't anything on stderr? Is it possible to recognize that a task's
+    finished?
+
+[ ] Open Quickly:
+
+    [ ] kfind works something like this (though they split the choices
+        between two tabs):
+        
+        Look in directory: [                       ][v]
+        For files named:   [                       ][v]
+        Containing text:   [                       ][v]
+        
+         [x] include subdirectories  [ ] case sensitive
+        
+        -----------------------------------------------
+        |                                             |
+        |                                             |
+        |                                             |
+        |                                             |
+        |                                             |
+        -----------------------------------------------
+        
+        [Open All]                  [Find/Stop] [Close]
+
+[ ] Cursor movement infelicities/bugs.
+
+    [ ] I'd be interested in making caseChangesLikeThis count
+        as word breaks. (Xcode 1.5 does this with control + arrow keys.)
+
+[ ] I'd really like to have Evergreen format javadoc-style comments for me,
+    making sure they're no more than 72 characters wide and have *s in
+    the right places and so forth.
+
+[ ] Only check for symbolic links on non-Windows OSes.
+
+[ ] Martin says we shouldn't write to a copy then copy that over the
+    original. He says to write a safe copy and then try writing into
+    the original. The advantage? ACLs and Windows security descriptors
+    would be preserved.
+    
+    One trick, is in being able to recognize that you've successfully
+    written a copy of the file. How do you know it's actually made it?
+    Even if you read it back, how do you know that's not coming from
+    some local cache?
+    
+    The original reason for this TODO entry was to prevent symlinks
+    from being replaced by the new copy of the file they refer to.
+    Canonicalization of filenames has provided a certainly adequate
+    and probably superior solution to that part of the problem.
+
+    The real problem with the create-write-rename approach is that it
+    doesn't work on Win32.
+
+[ ] The code for correcting indentation could be smarter. It doesn't do
+    well with any of the things mentioned below.
+    
+    [ ] C switch statements.
+
+        switch (x) {
+            case 1:
+                f();
+                break;
+            default:
+                g();
+                break;
+        }
+
+        (It does okay if you're prepared to use braces around the bodies
+        of the individual cases. This is a workaround I've taken to using,
+        when I find myself writing -- to my shame -- switch statements.)
+
+    [ ] C++ ostream output, where broken lines typically align at "<<".
+
+        std::cout << "hello, "
+                  << "world!" << std::endl;
+
+    [ ] Over-complicated expressions. If we have unbalanced parentheses,
+        we should probably indent as far as the last unclosed parenthesis.
+        This can lead to right-justified code, mind, but then what are
+        people doing writing stuff like this?
+
+        x = (some & (initial << expression)) | (this() * that() +
+                                                the_other() - 1);
+
+[ ] SCM: (BitKeeper for me, CVS for Ed)
+
+    3. remove current file
+        bk rm $filename
+
+    4. rename current file
+        bk mv $filename $new-filename
+
+    http://bk-emacs.bkbits.net/
+
+[ ] grep " *" * in a directory with a reasonable amount of stuff in it.
+    Watch Evergreen have some kind of spazzy fit. how can we cure this? Pike's
+    sam (and acme?) would redirect a command's output to a file, then show
+    the first n lines of that file, giving you the option to see more.
+    maybe we shouldn't auto-scroll? maybe we should block until the user
+    hits a key, sort of permanent 'pager' mode? maybe we need a second
+    level of buffering over the current get-a-line-or-a-few-hundred-
+    milliseconds-worth scheme, so that if we don't get a natural break,
+    we wait until we do. what i think i mean is that getting a newline
+    shouldn't flush. we should get (say) 16KiB or timeout. only in these
+    cases should we flush.
+
+[ ] Update the manual!
+
+[ ] Fix double-clicking next to a " character to be as it was before.
+
+[ ] Have a way to copy a file or rename a file.
+
+[ ] Make the arrow keys move through 4-space tabs? If backspace knows
+    about indent.string, shouldn't delete?
+
+[ ] Add some kind of "template" facility to "New File" to automatically fill
+    in the boilerplate. A combo box or list in the 'new' dialog would do,
+    letting us choose a named sample from the files in $EDIT_HOME/templates
+    or some-such. This is basically what Project Builder does (it has a
+    directory for each type).
+    
+[ ] Need to be able to go quickly from a #include to a header file.
+
+[ ] Handle out-of-date files better
+
+    If we kept a copy of the file's contents last time we knew we were clean, we could also provide diffs to the common ancestor.  Experience merging changes with BitKeeper shows that this isn't often useful but it's sometimes very useful.
+    
+    If we had that, we could notice that the file on disk was touched but its contents didn't change.  This would help me avoid spurious out-of-date watermarks with my bk edit setup.

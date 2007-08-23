@@ -1,0 +1,5 @@
+*~
+*.o
+*.rej
+.svn
+ChangeLog.html

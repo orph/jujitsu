@@ -1,0 +1,69 @@
+#!/usr/bin/ruby -w
+
+class Evergreen
+    def initialize()
+        require "fileutils.rb"
+        require "pathname.rb"
+        
+        # Cope with symbolic links to this script.
+        @project_root = Pathname.new(__FILE__).realpath().dirname().dirname()
+        require "#{@project_root}/lib/invoke-java.rb"
+        require "#{@project_root}/lib/target-os.rb"
+        require "#{@project_root}/lib/show-alert.rb"
+    end
+    
+    def launch()
+        report_exceptions("Evergreen") { launch0() }
+    end
+    
+    def launch0()
+        home = ENV["HOME"]
+        
+        ENV["EDIT_HOME"] = @project_root
+        
+        shouldBlock = false
+        if ARGV[0] == "--block"
+            ARGV.shift()
+            shouldBlock = true
+        end
+        
+        # Translate vi line number specifications.
+        if ARGV[0] =~ /^\+(\d+)$/
+            ARGV.shift()
+            ARGV[0] = "#{ARGV[0]}:#$1"
+        end
+        
+        edit_preferences_directory = "#{home}/.jujitsu"
+        if target_os() == "Darwin"
+            edit_preferences_directory = "#{home}/Library/Preferences/jujitsu"
+        end
+        
+        if FileTest.directory?(edit_preferences_directory) == false
+            FileUtils.mkdir_p(edit_preferences_directory)
+        end
+        if FileTest.exists?("#{edit_preferences_directory}/edit.properties") == false
+            FileUtils.cp("#{@project_root}/lib/data/edit.properties-sample", "#{edit_preferences_directory}/edit.properties")
+            FileUtils.cp("#{@project_root}/lib/data/edit.properties-sample", "#{edit_preferences_directory}/edit.properties.when-automatically-installed")
+        end
+        
+        serverPortPathname = Pathname.new(edit_preferences_directory) + "edit-server-port"
+        # InAppClient's constructor stops anyone else from reading the .secret file.
+        client = InAppClient.new(serverPortPathname)
+        filename = ARGV[0]
+        if filename != nil && client.trySendCommand("#{shouldBlock ? 'openAndBlock' : 'open'} #{File.expand_path(filename)}")
+            exit(0)
+        end
+        
+        # FIXME: this isn't right if shouldBlock is true. We either need to pass the "shouldBlock" on to the Java side, or we need to wait until it's started up and "trySendCommand" again.
+        if filename != nil
+            ARGV.push(filename)
+        end
+        
+        invoker = Java.new("Evergreen", "e/util/Launcher")
+        invoker.log_filename = "/tmp/edit.log.#$$"
+        invoker.add_pathname_property("preferencesDirectory", edit_preferences_directory)
+        invoker.invoke([ "Evergreen", "e.edit.EvergreenLaunchable" ])
+    end
+end
+
+Evergreen.new().launch()

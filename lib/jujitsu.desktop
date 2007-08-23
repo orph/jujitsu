@@ -1,0 +1,11 @@
+[Desktop Entry]
+Version=0.0
+Encoding=UTF-8
+Name=Jujitsu
+Comment=Programmer's Editor
+Type=Application
+Exec=jujitsu
+Icon=/usr/share/jujitsu/Resources/jujitsu/lib/evergreen-128.png
+Terminal=false
+Categories=GNOME;Application;Development;
+StartupNotify=true

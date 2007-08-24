@@ -1,5 +1,11 @@
 2007-08-23  Alex Graveley  <alex@beatniksoftware.com>
 
+	* src/e/ptextarea/PKeyHandler.java: Always move the caret on
+	pageup/down.  Try to keep the cursor in the same position when
+	paging as well.
+
+2007-08-23  Alex Graveley  <alex@beatniksoftware.com>
+
 	* PTextAreaRenderer.java: Don't draw the cursor as a squre yet, go
 	back to using an 'I' for now.
 

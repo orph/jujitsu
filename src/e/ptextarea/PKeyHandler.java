@@ -285,8 +285,16 @@ public class PKeyHandler implements KeyListener {
     }
     
     private int caretToStartOfLine() {
-        int lineIndex = textArea.getLineOfOffset(textArea.getUnanchoredSelectionExtreme());
-        return textArea.getLineStartOffset(lineIndex);
+        int offset = textArea.getUnanchoredSelectionExtreme();
+        int lineIndex = textArea.getLineOfOffset(offset);
+        int lineStart = textArea.getLineStartOffset(lineIndex);
+        int indentLen = textArea.getIndenter().getCurrentIndentationOfLine(lineIndex).length();
+
+        if (offset != lineStart + indentLen) {
+            return lineStart + indentLen;
+        } else {
+            return lineStart;
+        }
     }
     
     private int caretToEndOfLine() {

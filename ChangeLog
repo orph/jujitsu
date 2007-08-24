@@ -1,5 +1,8 @@
 2007-08-23  Alex Graveley  <alex@beatniksoftware.com>
 
+	* src/e/ptextarea/PMouseHandler.java (updateCursorAndToolTip): Use
+	text cursor by default.
+
 	* src/e/ptextarea/PKeyHandler.java (caretToStartOfLine): Move
 	between start of line and start of text on repeated Home presses.
 

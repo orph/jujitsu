@@ -162,13 +162,10 @@ final class PTextAreaRenderer {
             return;
         }
 
-        PCoordinates start = textArea.getCoordinates(textArea.getSelectionStart());
         PCoordinates end = textArea.getCoordinates(textArea.getSelectionStart() + 1);
-
-        Point startPt = textArea.getViewCoordinates(start);
         Point endPt = textArea.getViewCoordinates(end);
         
-        int width = Math.max(1, endPt.x - startPt.x);
+        int width = Math.max(1, endPt.x - x);
         int yTop = y - metrics.getMaxAscent();
         int yBottom = y + metrics.getMaxDescent() - 1;
 

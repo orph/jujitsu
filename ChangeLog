@@ -1,5 +1,9 @@
 2007-08-28  Alex Graveley  <alex@beatniksoftware.com>
 
+	* src/e/edit/EvergreenMenuBar.java: Add mnemonics to menus.
+
+2007-08-28  Alex Graveley  <alex@beatniksoftware.com>
+
 	* src/e/edit/Evergreen.java: Rename Window menu to Buffer.
 
 	* src/e/ptextarea/PTextArea.java (repaintCaret): Paint the whole

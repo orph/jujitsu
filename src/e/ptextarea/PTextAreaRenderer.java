@@ -10,6 +10,7 @@ final class PTextAreaRenderer {
     
     private static final Color MARGIN_BOUNDARY_COLOR = new Color(0.93f, 0.93f, 0.93f);
     private static final Color MARGIN_OUTSIDE_COLOR = new Color(0.97f, 0.97f, 0.97f);
+    private static final Color FOCUSED_CARET_BOUNDARY_COLOR = new Color(0.5f, 0.55f, 0.7f, 0.75f);
     
     // Used to get help us match the native UI when we're disabled.
     private static final JLabel disabledLabel;
@@ -154,8 +155,6 @@ final class PTextAreaRenderer {
         //stopWatch.print("Highlight painting");
     }
 
-    private static final Color FOCUSED_SELECTION_BOUNDARY_COLOR = new Color(0.5f, 0.55f, 0.7f, 0.75f);
-
     private void paintCaret(int x, int y) {
         if (textArea.isFocusOwner() == false || textArea.isEnabled() == false) {
             // An unfocused component shouldn't render a caret. There should be at most one caret on the display.
@@ -176,7 +175,7 @@ final class PTextAreaRenderer {
         g.setColor(Color.GREEN);
         g.fillRect(x, yTop, width, yBottom - yTop);
 
-        g.setColor(FOCUSED_SELECTION_BOUNDARY_COLOR);
+        g.setColor(FOCUSED_CARET_BOUNDARY_COLOR);
         g.drawRect(x, yTop, width, yBottom - yTop);
     }
 }

@@ -16,6 +16,7 @@ public class HelpMenu {
     
     public JMenu makeJMenu() {
         JMenu menu = new JMenu("Help");
+        menu.setMnemonic('H');
         
         // We don't support this yet, because we've got nothing to point it to.
         //menu.add(new PlaceholderAction(Log.getApplicationName() + " Help"));

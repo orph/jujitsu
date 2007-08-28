@@ -1,0 +1,27 @@
+
+Jujitsu TODO
+============
+
+* Inline file browse, find, build
+* Command-Colon command entry
+    * open, grep, save, kill, quit, etc
+* Kill workspaces
+    * Tools->Change project root
+    * Auto Find top of build tree
+        * Dir names to avoid: trunk, src
+* Buffers open in current frame
+    * Back/Forward buttons w/ sidebar
+* Tab strategy
+    * Kill tabs?
+    * Open in new tab/window
+* Frame splitting strategy
+    * Buffer->Split Buffer
+* Tag-based PageUp/Down -- jump to next/prev tag define 
+* Limit spellcheck to comments
+
+
+DONE
+====
+
+* Colored text background
+* Block cursor

@@ -1,3 +1,19 @@
+2007-08-28  Alex Graveley  <alex@beatniksoftware.com>
+
+	* src/e/edit/Evergreen.java: Rename Window menu to Buffer.
+
+	* src/e/ptextarea/PTextArea.java (repaintCaret): Paint the whole
+	line when invalidating the caret.
+
+	* src/e/ptextarea/PTextAreaRenderer.java (paintCaret): Draw he
+	caret as a green filled rectangle, with a 1-pixel border the same
+	color as the selection color.
+
+2007-08-24  Alex Graveley  <alex@beatniksoftware.com>
+
+	* src/e/edit/TagReader.java: Add "ctags-exuberant" as binary name,
+	which is what it's called on Ubuntu.
+
 2007-08-23  Alex Graveley  <alex@beatniksoftware.com>
 
 	* src/e/ptextarea/PMouseHandler.java (updateCursorAndToolTip): Use

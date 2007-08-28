@@ -93,14 +93,17 @@ final class PTextAreaRenderer {
         while (it.hasNext()) {
             PLineSegment segment = it.next();
             paintCharOffset = segment.getEnd();
-            g.setColor(overrideColor != null ? overrideColor : segment.getStyle().getColor());
-            segment.paint(g, x, baseline);
+
             if (segment.getOffset() == caretOffset && segment.isNewline() == false) {
                 paintCaret(x, baseline);
             } else if (segment.getOffset() <= caretOffset && segment.getEnd() > caretOffset) {
                 int caretX = x + segment.getDisplayWidth(metrics, x, caretOffset - segment.getOffset());
                 paintCaret(caretX, baseline);
             }
+
+            g.setColor(overrideColor != null ? overrideColor : segment.getStyle().getColor());
+            segment.paint(g, x, baseline);
+
             x += segment.getDisplayWidth(metrics, x);
             if (segment.isNewline()) {
                 x = startX;
@@ -150,27 +153,30 @@ final class PTextAreaRenderer {
         }
         //stopWatch.print("Highlight painting");
     }
-    
+
+    private static final Color FOCUSED_SELECTION_BOUNDARY_COLOR = new Color(0.5f, 0.55f, 0.7f, 0.75f);
+
     private void paintCaret(int x, int y) {
         if (textArea.isFocusOwner() == false || textArea.isEnabled() == false) {
             // An unfocused component shouldn't render a caret. There should be at most one caret on the display.
             // A disabled component shouldn't render a caret either.
             return;
         }
-        g.setColor(Color.GREEN);
 
+        PCoordinates start = textArea.getCoordinates(textArea.getSelectionStart());
+        PCoordinates end = textArea.getCoordinates(textArea.getSelectionStart() + 1);
+
+        Point startPt = textArea.getViewCoordinates(start);
+        Point endPt = textArea.getViewCoordinates(end);
+        
+        int width = Math.max(1, endPt.x - startPt.x);
         int yTop = y - metrics.getMaxAscent();
         int yBottom = y + metrics.getMaxDescent() - 1;
 
-        // NOTE: The rendering doesn't deal with this very well yet.
-        /*
-        g.fillRect(x, yTop, 20, yBottom - yTop);
-        */
+        g.setColor(Color.GREEN);
+        g.fillRect(x, yTop, width, yBottom - yTop);
 
-        g.drawLine(x, yTop + 1, x, yBottom - 1);
-        g.drawLine(x, yTop + 1, x + 1, yTop);
-        g.drawLine(x, yTop + 1, x - 1, yTop);
-        g.drawLine(x, yBottom - 1, x + 1, yBottom);
-        g.drawLine(x, yBottom - 1, x - 1, yBottom);
+        g.setColor(FOCUSED_SELECTION_BOUNDARY_COLOR);
+        g.drawRect(x, yTop, width, yBottom - yTop);
     }
 }

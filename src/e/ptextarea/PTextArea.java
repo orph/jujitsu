@@ -957,8 +957,14 @@ public class PTextArea extends JComponent implements PLineListener, Scrollable, 
         if (isLineWrappingInvalid()) {
             return;
         }
+
+        // FIXME: Only repaint the damaged area.
+        repaintIndexRange(caret.getStartIndex(), caret.getEndIndex());
+
+        /*
         Point point = getViewCoordinates(getCoordinates(caret.getStartIndex()));
         repaint(point.x - 1, point.y - metrics.getMaxAscent(), 3, metrics.getMaxAscent() + metrics.getMaxDescent());
+        */
     }
     
     public int getLineTop(int lineIndex) {

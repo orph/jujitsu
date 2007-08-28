@@ -17,7 +17,7 @@ public class EvergreenMenuBar extends EMenuBar {
         add(makeWorkspaceMenu());
         add(makeToolsMenu());
         add(makeDocumentationMenu());
-        add(makeWindowMenu());
+        add(makeBufferMenu());
         add(makeHelpMenu());
     }
     
@@ -209,8 +209,8 @@ public class EvergreenMenuBar extends EMenuBar {
         return menu;
     }
     
-    private JMenu makeWindowMenu() {
-        JMenu menu = new JMenu("Window");
+    private JMenu makeBufferMenu() {
+        JMenu menu = new JMenu("Buffer");
         menu.add(new CycleWindowsAction(1));
         menu.add(new CycleWindowsAction(-1));
         menu.add(new JSeparator());

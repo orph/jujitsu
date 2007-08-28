@@ -138,7 +138,6 @@ public class EvergreenMenuBar extends EMenuBar {
         final JMenu menu = new JMenu("Tools");
         menu.setMnemonic('T');
 
-        menu.add(new SetBuildTargetAction());
         menu.add(new OpenMakefileAction());
         
         menu.add(new JSeparator());

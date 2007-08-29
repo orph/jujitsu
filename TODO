@@ -11,17 +11,24 @@ Jujitsu TODO
         * Dir names to avoid: trunk, src
 * Buffers open in current frame
     * Back/Forward buttons w/ sidebar
-* Tab strategy
+* Workspace Tab strategy
     * Kill tabs?
     * Open in new tab/window
 * Frame splitting strategy
-    * Buffer->Split Buffer
+    * Buffer->Split Buffer?
+    * Track "fullsize" buffers, open new buffers fullsize
 * Tag-based PageUp/Down -- jump to next/prev tag define 
+* "Show Local Changes"
+* Use diff view for replace window?
 * Limit spellcheck to comments
+* View->Increase/Decrease Text Size
+* Create ChangeLog entry
 
 
 DONE
 ====
 
+* Buffer->Shrink Buffer
 * Colored text background
 * Block cursor
+* Use current file's directory in Open/Save As dialogs

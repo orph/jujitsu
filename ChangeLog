@@ -1,5 +1,31 @@
 2007-08-28  Alex Graveley  <alex@beatniksoftware.com>
 
+	* src/e/ptextarea/PTextArea.java (findNextOrPrevious): Cycle to
+	the first match if at the last match.
+
+	* src/e/edit/ShrinkWindowAction.java: New action to cycle and
+	expand the next buffer.
+
+	* src/e/edit/FindFilesContainingSelectionAction.java: Use
+	Ctrl-Shift-F as the accelerator.
+
+	* src/e/edit/EColumn.java (cycleWindow): Return the new EWindow.
+
+	* src/e/edit/FindAction.java: Make this act a bit more like
+	Firefox's search bar by iteratiing matches on Enter.  Also, leave
+	the cursor at the current match when pressing Escape and leave
+	matches highlighted.
+
+	* src/e/edit/Workspace.java (getCurrentDirectory): Get the current 
+	directory from the focused text buffer.
+	(showOpenDialog): Use getCurrentDirectory instead of root dir.
+	(showSaveAsDialog): Ditto.
+
+	* src/e/ptextarea/PTextAreaRenderer.java: Paint unfocused buffer
+	carets with an outline rect.
+
+2007-08-28  Alex Graveley  <alex@beatniksoftware.com>
+
 	* src/e/edit/EvergreenMenuBar.java: Add mnemonics to menus.
 
 2007-08-28  Alex Graveley  <alex@beatniksoftware.com>

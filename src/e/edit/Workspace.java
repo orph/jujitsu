@@ -74,6 +74,15 @@ public class Workspace extends JPanel {
         }
     }
     
+    public String getCurrentDirectory() {
+        final ETextWindow textWindow = ETextAction.getFocusedTextWindow();
+        if (textWindow == null) {
+            return getRootDirectory();
+        }
+        
+        return FileUtilities.fileFromString(textWindow.getFilename()).getParent();
+    }
+    
     /**
      * Returns the normal, friendly form rather than the OS-canonical one.
      * See also getCanonicalRootDirectory.
@@ -284,7 +293,7 @@ public class Workspace extends JPanel {
     
     public void showOpenDialog() {
         if (openDialog == null) {
-            openDialog = EFileDialog.makeOpenDialog(Evergreen.getInstance().getFrame(), getRootDirectory());
+            openDialog = EFileDialog.makeOpenDialog(Evergreen.getInstance().getFrame(), getCurrentDirectory());
         }
         openDialog.show();
         String name = openDialog.getFile();
@@ -296,7 +305,7 @@ public class Workspace extends JPanel {
     /** Returns the chosen save-as name, or null. */
     public String showSaveAsDialog() {
         if (saveAsDialog == null) {
-            saveAsDialog = EFileDialog.makeSaveDialog(Evergreen.getInstance().getFrame(), getRootDirectory());
+            saveAsDialog = EFileDialog.makeSaveDialog(Evergreen.getInstance().getFrame(), getCurrentDirectory());
         }
         saveAsDialog.show();
         return saveAsDialog.getFile();

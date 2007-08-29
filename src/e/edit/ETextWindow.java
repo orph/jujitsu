@@ -121,8 +121,7 @@ public class ETextWindow extends EWindow implements PTextListener {
     }
 
     public Color getColorForFilename(String filename) {
-        float hue = (filename.hashCode() % 16) / 16.0f;
-        System.out.println("Got hue:" + hue + " for file: " + filename);
+        float hue = (Math.abs(filename.hashCode()) % 16) / 16.0f;
         return Color.getHSBColor(hue, 0.25f, 0.95f);
     }   
     

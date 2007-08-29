@@ -1497,6 +1497,9 @@ public class PTextArea extends JComponent implements PLineListener, Scrollable, 
     protected void findNextOrPrevious(boolean next) {
         updateFindResults();
         PHighlight nextHighlight = highlights.getNextOrPreviousHighlight(PFind.MatchHighlight.HIGHLIGHTER_NAME, next, next ? getSelectionEnd() : getSelectionStart());
+        if (nextHighlight == null) {
+            nextHighlight = highlights.getNextOrPreviousHighlight(PFind.MatchHighlight.HIGHLIGHTER_NAME, next, next ? 0 : -1);
+        }
         if (nextHighlight != null) {
             selectHighlight(nextHighlight);
         }

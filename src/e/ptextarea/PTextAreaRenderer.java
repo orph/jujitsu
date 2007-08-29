@@ -156,8 +156,7 @@ final class PTextAreaRenderer {
     }
 
     private void paintCaret(int x, int y) {
-        if (textArea.isFocusOwner() == false || textArea.isEnabled() == false) {
-            // An unfocused component shouldn't render a caret. There should be at most one caret on the display.
+        if (textArea.isEnabled() == false) {
             // A disabled component shouldn't render a caret either.
             return;
         }
@@ -168,9 +167,11 @@ final class PTextAreaRenderer {
         int width = Math.max(1, endPt.x - x);
         int yTop = y - metrics.getMaxAscent();
         int yBottom = y + metrics.getMaxDescent() - 1;
-
-        g.setColor(Color.GREEN);
-        g.fillRect(x, yTop, width, yBottom - yTop);
+        
+        if (textArea.isFocusOwner()) {
+            g.setColor(Color.GREEN);
+            g.fillRect(x, yTop, width, yBottom - yTop);
+        }
 
         g.setColor(FOCUSED_CARET_BOUNDARY_COLOR);
         g.drawRect(x, yTop, width, yBottom - yTop);

@@ -78,13 +78,17 @@ public class FindAction extends ETextAction implements MinibufferUser {
     }
     
     public boolean wasAccepted(String value) {
-        return true;
+        currentTextWindow.getTextArea().findNext();
+        return false;
     }
     
     public void wasCanceled() {
+        // Leave all matches highlighted, and leave the cursor on the current match.
+        /*
         removeAllMatches();
         currentTextWindow.setCurrentRegularExpression(null);
         currentTextWindow.getTextArea().select(initialSelectionStart, initialSelectionEnd);
+        */
     }
     
     //

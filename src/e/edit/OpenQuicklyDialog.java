@@ -106,6 +106,7 @@ public class OpenQuicklyDialog implements WorkspaceFileList.Listener {
                 if (e.getClickCount() == 2) {
                     int index = matchList.locationToIndex(e.getPoint());
                     openFileAtIndex(index);
+                    form.getFormDialog().cancelDialog();
                 }
             }
         });

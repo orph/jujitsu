@@ -13,7 +13,7 @@ public class AutoCompleteAction extends ETextAction {
     private JWindow completionsWindow;
     
     public AutoCompleteAction() {
-        super("Complete");
+        super("Auto Complete");
         if (GuiUtilities.isMacOs()) {
             // All Cocoa text components use this.
             putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, InputEvent.ALT_MASK));

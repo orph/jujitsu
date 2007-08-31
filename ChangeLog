@@ -1,3 +1,11 @@
+2007-08-31  Alex Graveley  <alex@beatniksoftware.com>
+
+	* src/e/edit/AutoCompleteAction.java: Name the menu item
+	"Auto Complete" instead of Complete.
+
+	* src/e/edit/OpenQuicklyDialog.java: Close quick open dialog on
+	double click of a result.
+
 2007-08-28  Alex Graveley  <alex@beatniksoftware.com>
 
 	* src/e/ptextarea/PTextArea.java (findNextOrPrevious): Cycle to

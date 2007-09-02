@@ -1,3 +1,10 @@
+2007-09-01  Alex Graveley  <alex@beatniksoftware.com>
+
+	* src/e/ptextarea/PActionFactory.java: Use Ctrl-Shift-G for find
+	previous (instead of Ctrl-D).
+
+	* src/e/edit/EvergreenMenuBar.java: Resort the Find menu a bit.
+
 2007-08-31  Alex Graveley  <alex@beatniksoftware.com>
 
 	* src/e/edit/AutoCompleteAction.java: Name the menu item

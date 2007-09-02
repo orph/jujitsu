@@ -76,7 +76,7 @@ public class PActionFactory {
     
     public static class FindPreviousAction extends PTextAction {
         public FindPreviousAction() {
-            super("Find Previous", e.util.GuiUtilities.makeKeyStroke("D", false));
+            super("Find Previous", e.util.GuiUtilities.makeKeyStroke("G", true));
         }
         
         public void performOn(PTextArea textArea) {

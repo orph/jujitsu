@@ -101,18 +101,18 @@ public class EvergreenMenuBar extends EMenuBar {
         menu.setMnemonic('n');
 
         menu.add(FindAction.INSTANCE);
+        menu.add(new FindFilesContainingSelectionAction());
+        menu.add(new JSeparator());
+        
         menu.add(PActionFactory.makeFindNextAction());
         menu.add(PActionFactory.makeFindPreviousAction());
-        menu.add(new ScrollToSelectionAction());
-
         menu.add(new JSeparator());
-        menu.add(new FindAndReplaceAction());
-
-        menu.add(new JSeparator());
-        menu.add(new GotoAction());
         
+        menu.add(new FindAndReplaceAction());
         menu.add(new JSeparator());
-        menu.add(new FindFilesContainingSelectionAction());
+        
+        menu.add(new GotoAction());
+        menu.add(new ScrollToSelectionAction());
         
         return menu;
     }

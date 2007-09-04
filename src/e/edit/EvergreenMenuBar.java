@@ -16,7 +16,6 @@ public class EvergreenMenuBar extends EMenuBar {
         add(makeScmMenu());
         add(makeWorkspaceMenu());
         add(makeToolsMenu());
-        add(makeDocumentationMenu());
         add(makeBufferMenu());
         add(makeHelpMenu());
     }
@@ -163,8 +162,6 @@ public class EvergreenMenuBar extends EMenuBar {
     private JMenu makeDocumentationMenu() {
         JMenu menu = new JMenu("Documentation");
         menu.setMnemonic('D');
-
-        menu.add(new ShowDocumentationAction());
         
         // UI guidelines.
         menu.add(new JSeparator());
@@ -238,7 +235,11 @@ public class EvergreenMenuBar extends EMenuBar {
     
     private JMenu makeHelpMenu() {
         HelpMenu helpMenu = new HelpMenu();
-        return helpMenu.makeJMenu();
+        JMenu menu = helpMenu.makeJMenu();
+        menu.insert(new ShowDocumentationAction(), 0);
+        menu.insert(makeDocumentationMenu(), 1);
+        menu.insertSeparator(2);
+        return menu;
     }
     
     @Override

@@ -1,3 +1,11 @@
+2007-09-03  Alex Graveley  <alex@beatniksoftware.com>
+
+	* src/e/edit/ShowDocumentationAction.java: Rename to "Show
+	Documentation" (removing "for Word").
+
+	* src/e/edit/EvergreenMenuBar.java: Move Documentation submenu and
+	"Show Documentation" to the top of Help menu.
+
 2007-09-01  Alex Graveley  <alex@beatniksoftware.com>
 
 	* src/e/ptextarea/PActionFactory.java: Use Ctrl-Shift-G for find

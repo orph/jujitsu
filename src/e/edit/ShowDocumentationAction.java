@@ -12,7 +12,7 @@ public class ShowDocumentationAction extends ETextAction {
     private boolean building = false;
     
     public ShowDocumentationAction() {
-        super("Show Documentation for Word");
+        super("Show Documentation");
         putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_F1, 0));
     }
     

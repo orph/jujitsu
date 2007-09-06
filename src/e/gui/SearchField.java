@@ -27,7 +27,9 @@ public class SearchField extends JTextField {
     
     public SearchField(String placeholderText) {
         super(15);
-        addFocusListener(new PlaceholderText(placeholderText));
+        if (placeholderText != null && placeholderText.length() > 0) {
+            addFocusListener(new PlaceholderText(placeholderText));
+        }
         initBorder();
         initKeyListener();
     }
@@ -41,6 +43,11 @@ public class SearchField extends JTextField {
             return "";
         }
         return super.getText();
+    }
+
+    public void setText(String text) {
+        showingPlaceholderText = false;
+        super.setText(text);
     }
     
     private void initBorder() {
@@ -188,7 +195,6 @@ public class SearchField extends JTextField {
      */
     class PlaceholderText implements FocusListener {
         private String placeholderText;
-        private String previousText = "";
         private Color previousColor;
 
         PlaceholderText(String placeholderText) {
@@ -198,19 +204,17 @@ public class SearchField extends JTextField {
 
         public void focusGained(FocusEvent e) {
             setForeground(previousColor);
-            if (showingPlaceholderText) {
-                setText(previousText);
-                showingPlaceholderText = false;
+            if (getText().length() == 0) {
+                setText("");
             }
         }
 
         public void focusLost(FocusEvent e) {
-            previousText = getText();
             previousColor = getForeground();
-            if (previousText.length() == 0) {
-                showingPlaceholderText = true;
+            if (getText().length() == 0) {
                 setForeground(Color.GRAY);
                 setText(placeholderText);
+                showingPlaceholderText = true;
             }
         }
     }

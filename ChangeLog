@@ -1,5 +1,11 @@
 2007-09-06  Alex Graveley  <alex@beatniksoftware.com>
 
+	* src/e/gui/SearchField.java: Only add placeholder text if it's
+	not empty.  Avoid overwriting calls to setText while not focused
+	with the placeholder text on refocus.
+
+2007-09-06  Alex Graveley  <alex@beatniksoftware.com>
+
 	* src/e/util/PatternUtilities.java: "Regular Expression Help" ->
 	"RegEx Help" for Sidebar brevity.
 

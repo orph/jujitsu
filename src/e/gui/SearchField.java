@@ -35,6 +35,13 @@ public class SearchField extends JTextField {
     public SearchField() {
         this("Search");
     }
+
+    public String getText() {
+        if (showingPlaceholderText) {
+            return "";
+        }
+        return super.getText();
+    }
     
     private void initBorder() {
         new CancelBorder().attachTo(this);
@@ -45,6 +52,9 @@ public class SearchField extends JTextField {
         addKeyListener(new KeyAdapter() {
             public void keyReleased(KeyEvent e) {
                 if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
+                    if (getText().length() > 0) {
+                        e.consume();
+                    }
                     cancel();
                 } else if (e.getKeyCode() == KeyEvent.VK_ENTER) {
                     history.add(getText());

@@ -25,6 +25,7 @@ public class Evergreen {
     private JFrame frame;
     private JTabbedPane tabbedPane;
     private JSplitPane splitPane;
+    private Sidebar sidebar;
     private TagsPanel tagsPanel;
     private EStatusBar statusLine;
     private Minibuffer minibuffer;
@@ -45,7 +46,7 @@ public class Evergreen {
         private ArrayList<InitialWorkspace> initialWorkspaces = new ArrayList<InitialWorkspace>();
         private Point initialLocation = new Point(0, 0);
         private Dimension initialSize = new Dimension(800, 730);
-        private boolean showTagsPanel = true;
+        private boolean showSidebar = true;
         private int splitPaneDividerLocation = -1;
         
         /**
@@ -74,8 +75,8 @@ public class Evergreen {
         }
         
         /** Shows or hides the tags panel and sets the divider location, as it was last time we quit. */
-        private void configureTagsPanel() {
-            if (showTagsPanel) {
+        private void configureSidebar() {
+            if (showSidebar) {
                 if (splitPaneDividerLocation >= 0) {
                     splitPane.setDividerLocation(splitPaneDividerLocation);
                 } else {
@@ -140,6 +141,10 @@ public class Evergreen {
     
     public EHistoryComboBoxModel getFindHistory() {
         return findHistory;
+    }
+    
+    public Sidebar getSidebar() {
+        return sidebar;
     }
     
     public TagsPanel getTagsPanel() {
@@ -630,8 +635,8 @@ public class Evergreen {
             initialState.initialSize.width = Integer.parseInt(root.getAttribute("width"));
             initialState.initialSize.height = Integer.parseInt(root.getAttribute("height"));
             
-            if (root.hasAttribute("showTagsPanel")) {
-                initialState.showTagsPanel = Boolean.parseBoolean(root.getAttribute("showTagsPanel"));
+            if (root.hasAttribute("showSidebar")) {
+                initialState.showSidebar = Boolean.parseBoolean(root.getAttribute("showSidebar"));
                 if (root.hasAttribute("splitPaneDividerLocation")) {
                     initialState.splitPaneDividerLocation = Integer.parseInt(root.getAttribute("splitPaneDividerLocation"));
                 }
@@ -672,8 +677,8 @@ public class Evergreen {
             root.setAttribute("width", Integer.toString((int) size.getWidth()));
             root.setAttribute("height", Integer.toString((int) size.getHeight()));
             
-            root.setAttribute("showTagsPanel", Boolean.toString(tagsPanel.isVisible()));
-            root.setAttribute("splitPaneDividerLocation", Integer.toString(tagsPanel.isVisible() ? splitPane.getDividerLocation() : ShowHideTagsAction.oldDividerLocation));
+            root.setAttribute("showSidebar", Boolean.toString(sidebar.isVisible()));
+            root.setAttribute("splitPaneDividerLocation", Integer.toString(sidebar.isVisible() ? splitPane.getDividerLocation() : ShowHideTagsAction.oldDividerLocation));
             
             for (Workspace workspace : getWorkspaces()) {
                 workspace.serializeAsXml(document, root);
@@ -876,8 +881,13 @@ public class Evergreen {
         FormDialog.readGeometriesFrom(getDialogGeometriesPreferenceFilename());
         initWindow();
         initTagsPanel();
+
+        sidebar = new Sidebar();
+        sidebar.addDefaultPanel(tagsPanel);
+        sidebar.showPanel(tagsPanel);
+
         tabbedPane = new EvergreenTabbedPane();
-        splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, true, tabbedPane, tagsPanel);
+        splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, true, tabbedPane, sidebar);
         initStatusArea();
         readSavedState();
         
@@ -896,7 +906,7 @@ public class Evergreen {
         
         // These things want to be done after the frame is visible...
         
-        initialState.configureTagsPanel();
+        initialState.configureSidebar();
         
         EventQueue.invokeLater(new Runnable() {
             public void run() {

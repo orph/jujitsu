@@ -71,7 +71,7 @@ public final class PatternUtilities {
      */
     public static javax.swing.JPanel addRegularExpressionHelpToComponent(java.awt.Component component) {
         // Use a shorter title if it looks like we're trying to save space by fitting next to a field rather than in a status line.
-        String label = (component instanceof javax.swing.JTextField) ? "Help" : "Regular Expression Help";
+        String label = (component instanceof javax.swing.JTextField) ? "Help" : "RegEx Help";
         javax.swing.JPanel result = new javax.swing.JPanel(new java.awt.BorderLayout());
         result.add(component, java.awt.BorderLayout.CENTER);
         result.add(new e.gui.JHyperlinkButton(label, DOCUMENTATION_URL), java.awt.BorderLayout.EAST);

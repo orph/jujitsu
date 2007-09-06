@@ -43,6 +43,10 @@ public class ShowHideTagsAction extends AbstractAction {
     
     public static void setTagsPanelVisibility(boolean visible) {
         TagsPanel tagsPanel = Evergreen.getInstance().getTagsPanel();
+        Sidebar sidebar = Evergreen.getInstance().getSidebar();
+        sidebar.showPanel(tagsPanel);
+        
+        /*
         JSplitPane splitPane = Evergreen.getInstance().getSplitPane();
         if (visible) {
             splitPane.setDividerLocation(oldDividerLocation);
@@ -53,6 +57,8 @@ public class ShowHideTagsAction extends AbstractAction {
             splitPane.setDividerSize(0);
         }
         tagsPanel.setVisible(visible);
+        */
+        
         if (menuItem instanceof JCheckBoxMenuItem == false) {
             updateName(visible);
         }

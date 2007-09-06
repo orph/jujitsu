@@ -11,11 +11,9 @@ public class TagsPanel extends JPanel {
     private JProgressBar progressBar = new JProgressBar();
     private JPanel progressPanel;
     
-    private JPanel emptyPanel;
-    
     public TagsPanel() {
+        setName("Symbols");
         setLayout(new BorderLayout());
-        add(createUI(), BorderLayout.CENTER);
     }
     
     public void setTagsTree(Component c) {
@@ -26,7 +24,7 @@ public class TagsPanel extends JPanel {
         }
     }
     
-    public JComponent createUI() {
+    public void createUI() {
         /*
          * Embed the progress bar in a panel so that on platforms where a
          * progress bar can become arbitrarily tall (everything but Mac OS X,
@@ -37,14 +35,12 @@ public class TagsPanel extends JPanel {
         progressPanel = new JPanel();
         progressPanel.setBackground(UIManager.getColor("Tree.background"));
         progressPanel.add(progressBar);
-        
-        emptyPanel = new JPanel();
-        emptyPanel.setBackground(UIManager.getColor("Tree.background"));
-        return emptyPanel;
     }
     
     public void ensureTagsAreHidden() {
-        setVisibleComponent(emptyPanel);
+        if (isVisible()) {
+            Evergreen.getInstance().getSidebar().revertToDefaultPanel();
+        }
     }
     
     private void setVisibleComponent(Component c) {

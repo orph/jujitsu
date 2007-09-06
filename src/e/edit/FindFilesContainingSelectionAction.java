@@ -28,7 +28,10 @@ public class FindFilesContainingSelectionAction extends ETextAction {
             pattern = StringUtilities.regularExpressionFromLiteral(selection);
         }
         String directory = guessDirectoryToSearchIn();
-        workspace.showFindInFilesDialog(pattern, directory);
+        
+        // Jujitsu uses the sidebar version
+        //workspace.showFindInFilesDialog(pattern, directory);
+        workspace.showFindInFilesPanel(pattern, directory);
     }
     
     public String guessDirectoryToSearchIn() {

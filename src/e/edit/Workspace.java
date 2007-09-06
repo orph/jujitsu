@@ -20,7 +20,9 @@ public class Workspace extends JPanel {
     private String buildTarget;
     
     private OpenQuicklyDialog openQuicklyDialog;
+    private OpenQuicklyPanel openQuicklyPanel;
     private FindInFilesDialog findInFilesDialog;
+    private FindInFilesPanel findInFilesPanel;
     
     private EFileDialog openDialog;
     private EFileDialog saveAsDialog;
@@ -274,6 +276,22 @@ public class Workspace extends JPanel {
         findInFilesDialog.showDialog();
     }
     
+    public synchronized void showFindInFilesPanel(String pattern, String filenamePattern) {
+        if (findInFilesPanel == null) {
+            findInFilesPanel = new FindInFilesPanel(this);
+            Evergreen.getInstance().getSidebar().addPanel(findInFilesPanel);
+        }
+        if (pattern != null && pattern.length() > 0) {
+            findInFilesPanel.setPattern(pattern);
+        }
+        if (filenamePattern != null && filenamePattern.length() > 0) {
+            findInFilesPanel.setFilenamePattern(filenamePattern);
+        }
+        
+        System.out.println("showFindInFilesPanel called!!!");
+        Evergreen.getInstance().getSidebar().showPanel(findInFilesPanel);
+    }
+    
     /**
      * Shows the "Open Quickly" dialog with the given String as the contents
      * of the text field. Use the empty string to retain the current contents.
@@ -289,6 +307,21 @@ public class Workspace extends JPanel {
             openQuicklyDialog.setFilenamePattern(filenamePattern);
         }
         openQuicklyDialog.showDialog();
+    }
+    
+    public void showOpenQuicklyPanel(String filenamePattern) {
+        if (openQuicklyPanel == null) {
+            openQuicklyPanel = new OpenQuicklyPanel(this);
+            Evergreen.getInstance().getSidebar().addPanel(openQuicklyPanel);
+        }
+        if (filenamePattern != null && filenamePattern.length() > 0 && filenamePattern.contains("\n") == false) {
+            openQuicklyPanel.setFilenamePattern(filenamePattern);
+        }
+        
+        System.out.println("showOpenQuicklyPanel called!!!");
+        Evergreen.getInstance().getSidebar().showPanel(openQuicklyPanel);
+        
+        // openQuicklyDialog.showDialog();
     }
     
     public void showOpenDialog() {

@@ -1,6 +1,5 @@
 package e.edit;
 
-import e.forms.*;
 import e.gui.*;
 import e.util.*;
 import java.awt.*;
@@ -17,17 +16,14 @@ import org.jdesktop.swingworker.SwingWorker;
  * We have a list -- updated as you type in the filename field -- showing what files match the regular expression you've typed.
  * You can double-click individual entries to open them, or hit Return to open just the selected one(s).
  */
-public class OpenQuicklyPanel implements WorkspaceFileList.Listener {
-    private JTextField filenameField = new JTextField(40);
+public class OpenQuicklyPanel extends JPanel implements WorkspaceFileList.Listener {
+    private JTextField filenameField = new SearchField("Open Quickly");
     private JList matchList;
     private JLabel status = new JLabel(" ");
-    private JButton rescanButton;
+    private TextChangeTimeout changeTimeout;
     
     /** Which workspace is this "Open Quickly" for? */
     private Workspace workspace;
-    
-    /** Holds all the UI. The actual "dialog" is in here! */
-    private FormBuilder form;
     
     private void setStatus(boolean good, String text) {
         status.setForeground(good ? Color.BLACK : Color.RED);
@@ -88,7 +84,7 @@ public class OpenQuicklyPanel implements WorkspaceFileList.Listener {
         Evergreen.getInstance().openFile(workspace.prependRootDirectory(filename));
         
         // Now we've opened a new file, that's where focus should go when we're dismissed.
-        form.getFormDialog().setShouldRestoreFocus(false);
+        //form.getFormDialog().setShouldRestoreFocus(false);
         
         // Wrestle focus back from the file we've just opened.
         EventQueue.invokeLater(new Runnable() {
@@ -106,7 +102,11 @@ public class OpenQuicklyPanel implements WorkspaceFileList.Listener {
                 if (e.getClickCount() == 2) {
                     int index = matchList.locationToIndex(e.getPoint());
                     openFileAtIndex(index);
-                    form.getFormDialog().cancelDialog();
+                    
+                    //form.getFormDialog().cancelDialog();
+                    if (isVisible()) {
+                        Evergreen.getInstance().getSidebar().revertToDefaultPanel();
+                    }
                 }
             }
         });
@@ -117,32 +117,44 @@ public class OpenQuicklyPanel implements WorkspaceFileList.Listener {
     
     public OpenQuicklyPanel(Workspace workspace) {
         this.workspace = workspace;
-        this.rescanButton = RescanWorkspaceAction.makeRescanButton(workspace);
         
         initMatchList();
-        initForm();
+        initUI();
         
         workspace.getFileList().addFileListListener(this);
     }
     
-    private void initForm() {
-        this.form = new FormBuilder(Evergreen.getInstance().getFrame(), "Open Quickly");
-        form.setStatusBar(status);
-        form.setTypingTimeoutActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                showMatches();
-            }
-        });
-        FormPanel formPanel = form.getFormPanel();
-        formPanel.addRow("Names Containing:", filenameField);
-        formPanel.addRow("Matches:", new JScrollPane(matchList));
+    private void initUI() {
+        /*
         form.getFormDialog().setAcceptCallable(new java.util.concurrent.Callable<Boolean>() {
             public Boolean call() {
                 openSelectedFilesFromList();
                 return true;
             }
         });
-        form.getFormDialog().setExtraButton(rescanButton);
+        */
+
+        changeTimeout = new TextChangeTimeout(filenameField, new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    showMatches();
+                }
+            });
+
+        addFocusListener(new FocusAdapter() {
+                public void focusGained(FocusEvent e) {
+                   filenameField.requestFocus();
+                }
+            });
+        
+        setName("Open Quickly");
+        setLayout(new BorderLayout());
+
+        JPanel entriesStatus = new JPanel(new BorderLayout());
+        entriesStatus.add(filenameField, BorderLayout.NORTH);
+        entriesStatus.add(status, BorderLayout.SOUTH);
+
+        add(entriesStatus, BorderLayout.NORTH); // Names Containing
+        add(new JScrollPane(matchList), BorderLayout.CENTER); // Matches
     }
     
     /**
@@ -152,23 +164,11 @@ public class OpenQuicklyPanel implements WorkspaceFileList.Listener {
         filenameField.setText(filenamePattern);
     }
     
-    private class RescanAction extends AbstractAction {
-        public RescanAction() {
-            super("Rescan");
-        }
-        
-        public void actionPerformed(ActionEvent e) {
-            workspace.getFileList().updateFileList();
-        }
-    }
-    
     public void fileListStateChanged(boolean isNowValid) {
         if (isNowValid) {
             showMatches();
             matchList.setEnabled(true);
-            rescanButton.setEnabled(true);
         } else {
-            rescanButton.setEnabled(false);
             matchList.setEnabled(false);
             setStatus(true, " ");
             switchToFakeList();
@@ -183,11 +183,6 @@ public class OpenQuicklyPanel implements WorkspaceFileList.Listener {
         DefaultListModel model = new DefaultListModel();
         model.addElement("Rescan in progress...");
         matchList.setModel(model);
-    }
-    
-    public void showDialog() {
-        form.getFormDialog().setShouldRestoreFocus(true);
-        form.getFormDialog().showNonModal("Open");
     }
     
     public void openSelectedFilesFromList() {

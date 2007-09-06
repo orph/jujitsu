@@ -1,3 +1,45 @@
+2007-09-06  Alex Graveley  <alex@beatniksoftware.com>
+
+	* src/e/util/PatternUtilities.java: "Regular Expression Help" ->
+	"RegEx Help" for Sidebar brevity.
+
+	* src/e/edit/Evergreen.java: Create the sidebar, and expose it
+	using getSidebar.  Change all the preference load/store to refer
+	to 'sidebar' instead of 'tagsPanel'.
+
+	* src/e/edit/TagsPanel.java: Clean up some stuff like the empty
+	panel which is now handled in the Sidebar.
+
+	* src/e/edit/Sidebar.java: Simple JPanel that uses a CardLayout to
+	contain multiple sidebar panels, with only one shown at a
+	time. Handles bubbled Escapes on the panels in order to revert
+	back to the "default" panel (Symbols for now).
+
+	* src/e/edit/OpenQuicklyAction.java: Call
+	showOpenQuicklyPanel.
+
+	* src/e/edit/FindFilesContainingSelectionAction.java: Call
+	showFindInFilesPanel.
+
+	* src/e/edit/TextChangeTimeout.java: New utility class that
+	abstracts the FormDialog builtin text entry change monitoring and
+	timeout handling.
+
+	* src/e/edit/Workspace.java: Add showFindInFilesPanel and
+	showOpenQuicklyPanel which set those panels active in the sidebar.
+
+	* src/e/edit/FindInFilesPanel.java: Turn this into a simple JPanel
+	for use in the sidebar.  Drop rescan button (for now). Use
+	TextChangeTimeout instead of FormDialog's change monitoring.  Use
+	SearchFields for text entries.  Add a focus listener to focus the
+	first entry by default.
+	* src/e/edit/OpenQuicklyPanel.java: Ditto.
+
+	* src/e/gui/SearchField.java: Override getText to avoid returning
+	placeholder text.  Consume the Escape key events if there is
+	entered text, so that the first Escape clears the text (and stops
+	event emission), and a second Escape bubbles up.
+
 2007-09-03  Alex Graveley  <alex@beatniksoftware.com>
 
 	* src/e/edit/ShowDocumentationAction.java: Rename to "Show

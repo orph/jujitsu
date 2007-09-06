@@ -21,7 +21,9 @@ public class OpenQuicklyAction extends ETextAction {
             // If we have an absolute name, we can go straight there.
             Evergreen.getInstance().openFile(filename);
         } else {
-            Evergreen.getInstance().getCurrentWorkspace().showOpenQuicklyDialog(StringUtilities.regularExpressionFromLiteral(filename));
+            // Jujitsu uses the sidebar version
+            //Evergreen.getInstance().getCurrentWorkspace().showOpenQuicklyDialog(StringUtilities.regularExpressionFromLiteral(filename));
+            Evergreen.getInstance().getCurrentWorkspace().showOpenQuicklyPanel(StringUtilities.regularExpressionFromLiteral(filename));
         }
     }
 }

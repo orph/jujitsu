@@ -1,6 +1,5 @@
 package e.edit;
 
-import e.forms.*;
 import e.gui.*;
 import e.util.*;
 import java.awt.*;
@@ -13,16 +12,17 @@ import java.util.regex.*;
 import javax.swing.*;
 import javax.swing.event.*;
 import javax.swing.tree.*;
+import javax.swing.text.JTextComponent;
 
 import java.util.List;
 import org.jdesktop.swingworker.SwingWorker;
 
-public class FindInFilesPanel implements WorkspaceFileList.Listener {
-    private JTextField regexField = new JTextField(40);
-    private JTextField filenameRegexField = new JTextField(40);
+public class FindInFilesPanel extends JPanel implements WorkspaceFileList.Listener {
+    private JTextField regexField = new SearchField("Files Containing");
+    private JTextField filenameRegexField = new SearchField("Files Named");
     private JLabel status = new JLabel(" ");
     private ETree matchView;
-    private JButton rescanButton;
+    private TextChangeTimeout changeTimeout;
     
     private DefaultTreeModel matchTreeModel;
     
@@ -34,9 +34,6 @@ public class FindInFilesPanel implements WorkspaceFileList.Listener {
     
     /** We share these between all workspaces, to make it harder to accidentally launch a denial-of-service attack against ourselves. */
     private static final ExecutorService definitionFinderExecutor = ThreadUtilities.newFixedThreadPool(8, "Find Definitions");
-    
-    /** Holds all the UI. The actual "dialog" is in here! */
-    private FormBuilder form;
     
     public interface ClickableTreeItem {
         public void open();
@@ -502,28 +499,43 @@ public class FindInFilesPanel implements WorkspaceFileList.Listener {
     
     public FindInFilesPanel(Workspace workspace) {
         this.workspace = workspace;
-        this.rescanButton = RescanWorkspaceAction.makeRescanButton(workspace);
         
         initMatchList();
-        initForm();
+        initUI();
         initSaveMonitor();
         
         workspace.getFileList().addFileListListener(this);
     }
     
-    private void initForm() {
-        this.form = new FormBuilder(Evergreen.getInstance().getFrame(), "Find in Files in " + workspace.getTitle());
-        FormPanel formPanel = form.getFormPanel();
-        formPanel.addRow("Files Containing:", regexField);
-        formPanel.addRow("Whose Names Match:", filenameRegexField);
-        formPanel.addRow("", PatternUtilities.addRegularExpressionHelpToComponent(status));
-        formPanel.addRow("Matches:", new JScrollPane(matchView));
-        form.setTypingTimeoutActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                showMatches();
-            }
-        });
-        form.getFormDialog().setExtraButton(rescanButton);
+    private void initUI() {
+        changeTimeout = new TextChangeTimeout(new JTextComponent[] { 
+            regexField, 
+            filenameRegexField 
+        }, new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    showMatches();
+                }
+            });
+
+        addFocusListener(new FocusAdapter() {
+                public void focusGained(FocusEvent e) {
+                   regexField.requestFocus();
+                }
+            });
+
+        JPanel entries = new JPanel(new BorderLayout());
+        entries.add(regexField, BorderLayout.NORTH); // Files Containing
+        entries.add(filenameRegexField, BorderLayout.SOUTH); // Whose Names Match
+
+        JPanel entriesStatus = new JPanel(new BorderLayout());
+        entriesStatus.add(entries, BorderLayout.NORTH);
+        entriesStatus.add(PatternUtilities.addRegularExpressionHelpToComponent(status), 
+                          BorderLayout.SOUTH);
+
+        setName("Find in Files");
+        setLayout(new BorderLayout());
+        add(entriesStatus, BorderLayout.NORTH);
+        add(new JScrollPane(matchView), BorderLayout.CENTER); // Matches
     }
     
     private void initSaveMonitor() {
@@ -550,9 +562,5 @@ public class FindInFilesPanel implements WorkspaceFileList.Listener {
     
     public void setFilenamePattern(String pattern) {
         filenameRegexField.setText(pattern);
-    }
-    
-    public synchronized void showDialog() {
-        form.showNonModal();
     }
 }

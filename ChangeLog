@@ -1,5 +1,11 @@
 2007-09-06  Alex Graveley  <alex@beatniksoftware.com>
 
+	* src/e/gui/InteractiveBorder.java (isOverButton): Use interior
+	width - sideLength, not component width for buttons on the right.
+	(mouseMoved): Use a hand cursor when over the button area.
+
+2007-09-06  Alex Graveley  <alex@beatniksoftware.com>
+
 	* src/e/gui/SearchField.java: Only add placeholder text if it's
 	not empty.  Avoid overwriting calls to setText while not focused
 	with the placeholder text on refocus.

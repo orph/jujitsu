@@ -17,6 +17,7 @@ public abstract class InteractiveBorder extends EmptyBorder implements MouseInpu
     private boolean onLeft;
     private int sideLength;
     private JComponent component;
+    private Cursor componentCursor;
     
     /**
      * We assume that the addition to the border is square, and can only go
@@ -90,7 +91,7 @@ public abstract class InteractiveBorder extends EmptyBorder implements MouseInpu
         
         if (onLeft && e.getX() < sideLength) {
             return true;
-        } else if (!onLeft && e.getX() > component.getWidth() - sideLength) {
+        } else if (!onLeft && e.getX() > interior.getWidth() - sideLength) {
             return true;
         }
         return false;
@@ -123,7 +124,16 @@ public abstract class InteractiveBorder extends EmptyBorder implements MouseInpu
     }
     
     public void mouseMoved(MouseEvent e) {
-        // Who cares?
+        if (isOverButton(e)) {
+            Cursor handCursor = Cursor.getPredefinedCursor(Cursor.HAND_CURSOR);
+            if (component.getCursor() != handCursor) {
+                componentCursor = component.getCursor();
+                component.setCursor(handCursor);
+            }
+        } else if (componentCursor != null) {
+            component.setCursor(componentCursor);
+            componentCursor = null;
+        }
     }
     
     public void mouseClicked(MouseEvent e) {

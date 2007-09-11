@@ -11,6 +11,8 @@ import org.jdesktop.swingworker.SwingWorker;
 public class WorkspaceFileList {
     private Workspace workspace;
     private ArrayList<String> fileList;
+
+    private HashMap<String, String> minPathFileList;
     
     private FileAlterationMonitor fileAlterationMonitor;
     private String fileAlterationMonitorRoot;
@@ -83,7 +85,20 @@ public class WorkspaceFileList {
         }
         return result;
     }
-    
+
+    public String getUniqueFilePath(String path) {
+        return minPathFileList.get(path);
+    }
+
+    public String getFullFilePath(String uniquePath) {
+        for (Map.Entry<String, String> entry : minPathFileList.entrySet()) {
+            if (entry.getValue() == uniquePath) {
+                return entry.getKey();
+            }
+        }
+        return null;
+    }
+
     private void initFileAlterationMonitorForRoot(String rootDirectory) {
         // Get rid of any existing file alteration monitor.
         if (fileAlterationMonitor != null) {
@@ -123,7 +138,51 @@ public class WorkspaceFileList {
             // Users of the list can then assume it's in order.
             Collections.sort(newFileList, String.CASE_INSENSITIVE_ORDER);
             fileList = newFileList;
+
+            minPathFileList = makeMinPaths(newFileList);
+
             return fileList;
+        }
+
+        private HashMap<String, String> makeMinPaths(ArrayList<String> paths) {
+            ArrayList<String> revPaths = new ArrayList<String>();
+            HashMap<String, String> pathToMinPath = new HashMap<String, String>();
+
+            for (String path : paths) {
+                revPaths.add(new StringBuilder(path).reverse().toString());
+            }
+            Collections.sort(revPaths, String.CASE_INSENSITIVE_ORDER);
+
+            System.out.println("makeMinPaths2!! files=" + revPaths.size());
+
+            for (int i = 0; i < revPaths.size(); i++) {
+                String s1 = revPaths.get(i);
+                String s2 = "";
+                if (revPaths.size() > 1) {
+                    if (i < revPaths.size() - 1) {
+                        s2 = revPaths.get(i + 1);
+                    } else {
+                        s2 = revPaths.get(i - 1);
+                    }
+                }
+
+                int n = 0;
+                while (n < s1.length() && n < s2.length() &&
+                       s1.charAt(n) == s2.charAt(n)) {
+                    n++;
+                }
+                n = s1.indexOf(File.separator, n);
+                if (n < 0) {
+                    n = s1.length();
+                }
+
+                StringBuilder sb = new StringBuilder(s1).reverse();
+                pathToMinPath.put(sb.toString(), sb.substring(sb.length() - n));
+
+                System.out.println("Got shortest path: \'" + sb.substring(sb.length() - n) + "\' for \'" + sb.toString());
+            }
+
+            return pathToMinPath;
         }
         
         /**

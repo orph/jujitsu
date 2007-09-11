@@ -32,6 +32,11 @@ public class SearchField extends JTextField {
         }
         initBorder();
         initKeyListener();
+
+        InputMap im = getInputMap();
+        im.put(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0), "next-result");
+        im.put(KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0), "previous-result");
+        im.put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "open-result");
     }
     
     public SearchField() {

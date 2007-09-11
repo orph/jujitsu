@@ -18,8 +18,8 @@ import java.util.List;
 import org.jdesktop.swingworker.SwingWorker;
 
 public class FindInFilesPanel extends JPanel implements WorkspaceFileList.Listener {
-    private JTextField regexField = new SearchField("Files Containing");
-    private JTextField filenameRegexField = new SearchField("Files Named");
+    private SearchField regexField = new SearchField("Files Containing");
+    private SearchField filenameRegexField = new SearchField("Files Named");
     private JLabel status = new JLabel(" ");
     private ETree matchView;
     private TextChangeTimeout changeTimeout;
@@ -506,8 +506,32 @@ public class FindInFilesPanel extends JPanel implements WorkspaceFileList.Listen
         
         workspace.getFileList().addFileListListener(this);
     }
+
+    private void addSearchFieldActions(SearchField entry) {
+        ActionMap am = entry.getActionMap();
+        am.put("next-result", new AbstractAction() {
+                public void actionPerformed(ActionEvent e) {
+                    System.out.println("actionPerformed::next-result");
+                    //matchView.setSelectedIndex(matchTreeModel.getSelectedIndex() + 1);
+                }
+            });
+        am.put("previous-result", new AbstractAction() {
+                public void actionPerformed(ActionEvent e) {
+                    System.out.println("actionPerformed::previous-result");
+                    //matchView.setSelectedIndex(matchTreeModel.getSelectedIndex() - 1);
+                }
+            });
+        am.put("open-result", new AbstractAction() {
+                public void actionPerformed(ActionEvent e) {
+                    System.out.println("actionPerformed::open-result");
+                }
+            });
+    }
     
     private void initUI() {
+        addSearchFieldActions(regexField);
+        addSearchFieldActions(filenameRegexField);
+
         changeTimeout = new TextChangeTimeout(new JTextComponent[] { 
             regexField, 
             filenameRegexField 

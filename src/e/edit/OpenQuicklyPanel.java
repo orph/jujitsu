@@ -5,6 +5,7 @@ import e.util.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
+import java.util.*;
 import java.util.List;
 import java.util.regex.*;
 import javax.swing.*;
@@ -17,7 +18,7 @@ import org.jdesktop.swingworker.SwingWorker;
  * You can double-click individual entries to open them, or hit Return to open just the selected one(s).
  */
 public class OpenQuicklyPanel extends JPanel implements WorkspaceFileList.Listener {
-    private JTextField filenameField = new SearchField("Open Quickly");
+    private SearchField filenameField = new SearchField("Open Quickly");
     private JList matchList;
     private JLabel status = new JLabel(" ");
     private TextChangeTimeout changeTimeout;
@@ -48,12 +49,19 @@ public class OpenQuicklyPanel extends JPanel implements WorkspaceFileList.Listen
                 long startTimeMs = System.currentTimeMillis();
                 
                 List<String> fileList = workspace.getFileList().getListOfFilesMatching(regularExpression);
-                for (int i = 0; i < fileList.size(); i++) {
-                    model.addElement(fileList.get(i));
+                ArrayList<String> shortPathList = new ArrayList<String>();
+                for (String path : fileList) {
+                    shortPathList.add(workspace.getFileList().getUniqueFilePath(path));
                 }
+                Collections.sort(shortPathList, String.CASE_INSENSITIVE_ORDER);
+
+                for (String shortPath : shortPathList) {
+                    model.addElement(shortPath);
+                }
+
                 final int indexedFileCount = workspace.getFileList().getIndexedFileCount();
                 if (indexedFileCount != -1) {
-                    statusText = fileList.size() + " / " + StringUtilities.pluralize(indexedFileCount, "file", "files") + " match.";
+                    statusText = fileList.size() + " / " + StringUtilities.pluralize(indexedFileCount, "file", "files") + " match";
                 }
                 
                 long endTimeMs = System.currentTimeMillis();
@@ -81,6 +89,10 @@ public class OpenQuicklyPanel extends JPanel implements WorkspaceFileList.Listen
     
     private void openFileAtIndex(int index) {
         String filename = (String) matchList.getModel().getElementAt(index);
+        
+        // FIXME: This is a slow hack.
+        filename = workspace.getFileList().getFullFilePath(filename);
+
         Evergreen.getInstance().openFile(workspace.prependRootDirectory(filename));
         
         // Now we've opened a new file, that's where focus should go when we're dismissed.
@@ -123,6 +135,28 @@ public class OpenQuicklyPanel extends JPanel implements WorkspaceFileList.Listen
         
         workspace.getFileList().addFileListListener(this);
     }
+
+    private void addSearchFieldActions(SearchField entry) {
+        ActionMap am = filenameField.getActionMap();
+        am.put("next-result", new AbstractAction() {
+                public void actionPerformed(ActionEvent e) {
+                    System.out.println("actionPerformed::next-result");
+                    matchList.setSelectedIndex(matchList.getSelectedIndex() + 1);
+                }
+            });
+        am.put("previous-result", new AbstractAction() {
+                public void actionPerformed(ActionEvent e) {
+                    System.out.println("actionPerformed::previous-result");
+                    matchList.setSelectedIndex(matchList.getSelectedIndex() - 1);
+                }
+            });
+        am.put("open-result", new AbstractAction() {
+                public void actionPerformed(ActionEvent e) {
+                    System.out.println("actionPerformed::open-result");
+                    openSelectedFilesFromList();
+                }
+            });
+    }
     
     private void initUI() {
         /*
@@ -134,6 +168,7 @@ public class OpenQuicklyPanel extends JPanel implements WorkspaceFileList.Listen
         });
         */
 
+        addSearchFieldActions(filenameField);
         changeTimeout = new TextChangeTimeout(filenameField, new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
                     showMatches();
@@ -186,7 +221,6 @@ public class OpenQuicklyPanel extends JPanel implements WorkspaceFileList.Listen
     }
     
     public void openSelectedFilesFromList() {
-        ListModel list = matchList.getModel();
         for (int index : matchList.getSelectedIndices()) {
             openFileAtIndex(index);
         }

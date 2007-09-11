@@ -33,6 +33,7 @@ public class Sidebar extends JPanel {
         
         c.getInputMap(WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(
             KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0, true), "revert-panel");
+
         c.getActionMap().put("revert-panel", new AbstractAction() {
                 public void actionPerformed(ActionEvent e) {
                     System.out.println("actionPerformed::revert-panel");

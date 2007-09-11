@@ -1,3 +1,16 @@
+2007-09-11  Alex Graveley  <alex@beatniksoftware.com>
+
+	* src/e/edit/WorkspaceFileList.java: Add getUniqueFilePath and
+	getFullFilePath, and generate unique names for files when
+	crawling.  This algo needs work to speed it up.
+
+	* src/e/edit/FindInFilesPanel.java: Use SearchFields for entries.
+	* src/e/edit/OpenQuicklyPanel.java: Ditto.  List unique file paths
+	for files, instead of the full project path.
+
+	* src/e/gui/SearchField.java: Add next/previous/open-result
+	actions.
+
 2007-09-06  Alex Graveley  <alex@beatniksoftware.com>
 
 	* src/e/gui/InteractiveBorder.java (isOverButton): Use interior

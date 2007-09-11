@@ -59,10 +59,10 @@ class Evergreen
             ARGV.push(filename)
         end
         
-        invoker = Java.new("Evergreen", "e/util/Launcher")
+        invoker = Java.new("Jujitsu", "e/util/Launcher")
         invoker.log_filename = "/tmp/edit.log.#$$"
         invoker.add_pathname_property("preferencesDirectory", edit_preferences_directory)
-        invoker.invoke([ "Evergreen", "e.edit.EvergreenLaunchable" ])
+        invoker.invoke([ "Jujitsu", "e.edit.EvergreenLaunchable" ])
     end
 end
 

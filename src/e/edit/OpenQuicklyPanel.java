@@ -128,6 +128,9 @@ public class OpenQuicklyPanel extends JPanel implements WorkspaceFileList.Listen
     }
     
     public OpenQuicklyPanel(Workspace workspace) {
+        super(new BorderLayout());
+        setName("Open Quickly");
+        
         this.workspace = workspace;
         
         initMatchList();
@@ -180,9 +183,6 @@ public class OpenQuicklyPanel extends JPanel implements WorkspaceFileList.Listen
                    filenameField.requestFocus();
                 }
             });
-        
-        setName("Open Quickly");
-        setLayout(new BorderLayout());
 
         JPanel entriesStatus = new JPanel(new BorderLayout());
         entriesStatus.add(filenameField, BorderLayout.NORTH);

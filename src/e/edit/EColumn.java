@@ -18,23 +18,25 @@ import javax.swing.event.*;
  * 
  * @author Elliott Hughes <enh@acm.org>
  */
-public class EColumn extends JSplitPane {
+public class EColumn extends JPanel {
     private static final int MIN_HEIGHT = ETitleBar.TITLE_HEIGHT + 5;
     
-    private JSplitPane splitPane = new JSplitPane();
-    private TextsPanel bottomPanel = new TextsPanel();
+    private TextsPanel textsPanel;
     
     /**
      * Creates a new empty column.
      */
     public EColumn() {
-        super(JSplitPane.VERTICAL_SPLIT, true);
-        setBottomComponent(bottomPanel);
+        super(new BorderLayout());
+        
+        textsPanel = new TextsPanel();
+        add(textsPanel, BorderLayout.CENTER);
+        
         initPopUpMenu();
     }
     
     private void initPopUpMenu() {
-        EPopupMenu backgroundMenu = new EPopupMenu(bottomPanel);
+        EPopupMenu backgroundMenu = new EPopupMenu(textsPanel);
         backgroundMenu.addMenuItemProvider(new MenuItemProvider() {
             public void provideMenuItems(MouseEvent e, Collection<Action> actions) {
                 actions.add(new OpenQuicklyAction());
@@ -45,25 +47,17 @@ public class EColumn extends JSplitPane {
         });
     }
     
-    public void setErrorsWindow(EErrorsWindow errorsWindow) {
-        // This, sad to say, is the least difficult way to do what JSplitPane.setDividerLocation should do.
-        errorsWindow.setPreferredSize(new Dimension(0, 0));
-        errorsWindow.setVisible(false);
-        
-        setTopComponent(errorsWindow);
-    }
-    
     public void setSelectedWindow(EWindow window) {
         window.requestFocus();
     }
     
     public void addComponent(EWindow c, int y) {
-        bottomPanel.addComponent(c, y);
+        textsPanel.addComponent(c, y);
         getWorkspace().updateTabForWorkspace();
     }
     
     public void removeComponent(EWindow c, boolean mustReassignFocus) {
-        bottomPanel.removeComponent(c, mustReassignFocus);
+        textsPanel.removeComponent(c, mustReassignFocus);
         getWorkspace().updateTabForWorkspace();
     }
     
@@ -72,20 +66,20 @@ public class EColumn extends JSplitPane {
     }
     
     public void expandComponent(Component luckyBoy) {
-        bottomPanel.expandComponent(luckyBoy);
+        textsPanel.expandComponent(luckyBoy);
     }
     
     public void moveTo(Component c, int y) {
-        bottomPanel.moveTo(c, y);
+        textsPanel.moveTo(c, y);
     }
     
     public EWindow cycleWindow(EWindow window, int indexDelta) {
-        return bottomPanel.cycleWindow(window, indexDelta);
+        return textsPanel.cycleWindow(window, indexDelta);
     }
     
     public ETextWindow[] getTextWindows() {
         ArrayList<ETextWindow> result = new ArrayList<ETextWindow>();
-        for (Component c : bottomPanel.getComponents()) {
+        for (Component c : textsPanel.getComponents()) {
             if (c instanceof ETextWindow) {
                 result.add(ETextWindow.class.cast(c));
             }
@@ -179,7 +173,7 @@ public class EColumn extends JSplitPane {
             /** Causes the title bar to track the mouse's movements. */
             public void mouseDragged(MouseEvent e) {
                 Component titleBar = (Component) e.getSource();
-                moveTo(titleBar.getParent(), SwingUtilities.convertMouseEvent(titleBar, e, bottomPanel).getY() - pointerOffset);
+                moveTo(titleBar.getParent(), SwingUtilities.convertMouseEvent(titleBar, e, textsPanel).getY() - pointerOffset);
             }
         }
         

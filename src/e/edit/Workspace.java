@@ -11,17 +11,15 @@ import java.util.List;
 import javax.swing.*;
 
 public class Workspace extends JPanel {
-    private EColumn leftColumn = new EColumn();
-    private EErrorsWindow errorsWindow = new EErrorsWindow(this);
+    private EColumn leftColumn;
 
     private String title;
     private String rootDirectory;
     private String canonicalRootDirectory;
     private String buildTarget;
     
-    private OpenQuicklyDialog openQuicklyDialog;
+    private EErrorsPanel errorsPanel;
     private OpenQuicklyPanel openQuicklyPanel;
-    private FindInFilesDialog findInFilesDialog;
     private FindInFilesPanel findInFilesPanel;
     
     private EFileDialog openDialog;
@@ -35,11 +33,14 @@ public class Workspace extends JPanel {
     
     public Workspace(String title, final String rootDirectory) {
         super(new BorderLayout());
+        
         setTitle(title);
         this.fileList = new WorkspaceFileList(this);
         setRootDirectory(rootDirectory);
         this.buildTarget = "";
-        add(makeUI(), BorderLayout.CENTER);
+        
+        leftColumn = new EColumn();
+        add(leftColumn, BorderLayout.CENTER);
     }
     
     public WorkspaceFileList getFileList() {
@@ -120,11 +121,6 @@ public class Workspace extends JPanel {
         // We cache this because it's called when deciding on a workspace for a newly-opened file.
         // We don't want the UI to lock up because an unrelated workspace's NFS mount is temporarily unresponsive.
         return canonicalRootDirectory;
-    }
-    
-    public JComponent makeUI() {
-        leftColumn.setErrorsWindow(errorsWindow);
-        return leftColumn;
     }
     
     /** Tests whether this workspace is empty. A workspace is still considered empty if all it contains is an errors window. */
@@ -212,8 +208,8 @@ public class Workspace extends JPanel {
         return viewer;
     }
     
-    public EErrorsWindow getErrorsWindow() {
-        return errorsWindow;
+    public EErrorsPanel getErrorsPanel() {
+        return errorsPanel;
     }
     
     /**
@@ -263,19 +259,6 @@ public class Workspace extends JPanel {
      * a bad idea anyway. Either you've got a better suggestion than what the
      * user last typed, or you should leave things as they are.
      */
-    public synchronized void showFindInFilesDialog(String pattern, String filenamePattern) {
-        if (findInFilesDialog == null) {
-            findInFilesDialog = new FindInFilesDialog(this);
-        }
-        if (pattern != null && pattern.length() > 0) {
-            findInFilesDialog.setPattern(pattern);
-        }
-        if (filenamePattern != null && filenamePattern.length() > 0) {
-            findInFilesDialog.setFilenamePattern(filenamePattern);
-        }
-        findInFilesDialog.showDialog();
-    }
-    
     public synchronized void showFindInFilesPanel(String pattern, String filenamePattern) {
         if (findInFilesPanel == null) {
             findInFilesPanel = new FindInFilesPanel(this);
@@ -299,16 +282,6 @@ public class Workspace extends JPanel {
      * a bad idea anyway. Either you've got a better suggestion than what the
      * user last typed, or you should leave things as they are.
      */
-    public void showOpenQuicklyDialog(String filenamePattern) {
-        if (openQuicklyDialog == null) {
-            openQuicklyDialog = new OpenQuicklyDialog(this);
-        }
-        if (filenamePattern != null && filenamePattern.length() > 0 && filenamePattern.contains("\n") == false) {
-            openQuicklyDialog.setFilenamePattern(filenamePattern);
-        }
-        openQuicklyDialog.showDialog();
-    }
-    
     public void showOpenQuicklyPanel(String filenamePattern) {
         if (openQuicklyPanel == null) {
             openQuicklyPanel = new OpenQuicklyPanel(this);
@@ -318,10 +291,16 @@ public class Workspace extends JPanel {
             openQuicklyPanel.setFilenamePattern(filenamePattern);
         }
         
-        System.out.println("showOpenQuicklyPanel called!!!");
         Evergreen.getInstance().getSidebar().showPanel(openQuicklyPanel);
+    }
+    
+    public void showErrorsPanel() {
+        if (errorsPanel == null) {
+            errorsPanel = new EErrorsPanel(this);
+            Evergreen.getInstance().getSidebar().addPanel(errorsPanel);
+        }
         
-        // openQuicklyDialog.showDialog();
+        Evergreen.getInstance().getSidebar().showPanel(errorsPanel);
     }
     
     public void showOpenDialog() {

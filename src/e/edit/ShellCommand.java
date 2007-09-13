@@ -83,7 +83,7 @@ public class ShellCommand {
         startMonitoringStream(process.getInputStream());
         startMonitoringStream(process.getErrorStream());
         
-        workspace.getErrorsWindow().resetAutoScroll();
+        workspace.getErrorsPanel().resetAutoScroll();
     }
     
     private void pumpStandardInput() {
@@ -99,12 +99,12 @@ public class ShellCommand {
             }
         } catch (Exception ex) {
             Log.warn("Problem pumping standard input for task '" + command + "'", ex);
-            workspace.getErrorsWindow().append(new String[] { "Problem pumping standard input for task '" + command + "': " + ex.getMessage() + "." });
+            workspace.getErrorsPanel().append(new String[] { "Problem pumping standard input for task '" + command + "': " + ex.getMessage() + "." });
         } finally {
             try {
                 os.close();
             } catch (IOException ex) {
-                workspace.getErrorsWindow().append(new String[] { "Couldn't close standard input for task '" + command + "': " + ex.getMessage() + "." });
+                workspace.getErrorsPanel().append(new String[] { "Couldn't close standard input for task '" + command + "': " + ex.getMessage() + "." });
             }
         }
     }
@@ -145,7 +145,7 @@ public class ShellCommand {
         case DISCARD:
             break;
         case ERRORS_WINDOW:
-            getWorkspace().getErrorsWindow().append(lines);
+            getWorkspace().getErrorsPanel().append(lines);
             break;
         case CLIPBOARD:
         case DIALOG:
@@ -201,7 +201,7 @@ public class ShellCommand {
         if (exitStatus != 0) {
             errorsWindowFooter.add("Task '" + command + "' failed with exit status " + exitStatus);
         }
-        workspace.getErrorsWindow().append(errorsWindowFooter.toArray(new String[errorsWindowFooter.size()]));
+        workspace.getErrorsPanel().append(errorsWindowFooter.toArray(new String[errorsWindowFooter.size()]));
     }
     
     /**

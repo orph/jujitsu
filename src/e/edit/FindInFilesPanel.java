@@ -498,6 +498,9 @@ public class FindInFilesPanel extends JPanel implements WorkspaceFileList.Listen
     }
     
     public FindInFilesPanel(Workspace workspace) {
+        super(new BorderLayout());
+        setName("Find in Files");
+        
         this.workspace = workspace;
         
         initMatchList();
@@ -556,8 +559,6 @@ public class FindInFilesPanel extends JPanel implements WorkspaceFileList.Listen
         entriesStatus.add(PatternUtilities.addRegularExpressionHelpToComponent(status), 
                           BorderLayout.SOUTH);
 
-        setName("Find in Files");
-        setLayout(new BorderLayout());
         add(entriesStatus, BorderLayout.NORTH);
         add(new JScrollPane(matchView), BorderLayout.CENTER); // Matches
     }

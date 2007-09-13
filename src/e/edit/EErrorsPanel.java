@@ -27,7 +27,7 @@ import e.util.*;
  * build output only contains absolute names, and to not rely on this
  * code to do anything useful.
  */
-public class EErrorsWindow extends EWindow {
+public class EErrorsPanel extends JPanel {
     private static final Pattern MAKE_ENTERING_DIRECTORY_PATTERN = Pattern.compile("^make(?:\\[\\d+\\])?: Entering directory `(.*)'$", Pattern.MULTILINE);
     
     /**
@@ -38,10 +38,14 @@ public class EErrorsWindow extends EWindow {
     private final Workspace workspace;
     private PTextArea textArea;
     
-    public EErrorsWindow(Workspace workspace) {
-        super("+Errors");
+    public EErrorsPanel(Workspace workspace) {
+        super(new BorderLayout());
+        setName("+Errors");
+        
         this.workspace = workspace;
+        
         initTextArea();
+        
         JScrollPane scrollPane = new JScrollPane(textArea, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
         GuiUtilities.keepMaximumShowing(scrollPane.getVerticalScrollBar());
         add(scrollPane, BorderLayout.CENTER);
@@ -178,6 +182,8 @@ public class EErrorsWindow extends EWindow {
     }
     
     public void append(String[] lines) {
+        /* Should we show the error dialog now, or later? */
+        workspace.showErrorsPanel();
         EventQueue.invokeLater(new AppendRunnable(lines));
     }
     

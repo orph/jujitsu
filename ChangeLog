@@ -1,3 +1,10 @@
+2007-09-13  Alex Graveley  <alex@beatniksoftware.com>
+
+	* src/e/edit/EErrorsPanel.java: New, replaces the errors window
+	with a sidebar.
+
+	Kill old *Dialog versions of the panels.
+
 2007-09-11  Alex Graveley  <alex@beatniksoftware.com>
 
 	* src/e/edit/WorkspaceFileList.java: Add getUniqueFilePath and

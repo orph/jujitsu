@@ -55,7 +55,7 @@ public class FindInFilesPanel extends JPanel implements WorkspaceFileList.Listen
             if (window instanceof ETextWindow) {
                 ETextWindow textWindow = (ETextWindow) window;
                 FindAction.INSTANCE.findInText(textWindow, PatternUtilities.toString(pattern));
-                final int lineNumber = Integer.parseInt(line.substring(1, line.indexOf(':', 1)));
+                final int lineNumber = Integer.parseInt(line.substring(0, line.indexOf(':', 1)));
                 textWindow.getTextArea().goToLine(lineNumber);
             }
         }
@@ -222,21 +222,20 @@ public class FindInFilesPanel extends JPanel implements WorkspaceFileList.Listen
         }
         
         private DefaultMutableTreeNode getPathNode(String pathname) {
-            String[] pathElements = pathname.split(Pattern.quote(File.separator));
-            String pathSoFar = "";
+            String parentPath = FileUtilities.fileFromString(pathname).getParent();
+            parentPath = FileUtilities.getUserFriendlyName(parentPath);
+            
             DefaultMutableTreeNode parentNode = matchRoot;
             DefaultMutableTreeNode node = matchRoot;
+            
             synchronized (matchView) {
-                for (int i = 0; i < pathElements.length - 1; ++i) {
-                    pathSoFar += pathElements[i] + File.separator;
-                    node = pathMap.get(pathSoFar);
-                    if (node == null) {
-                        node = new DefaultMutableTreeNode(pathElements[i] + File.separator);
-                        parentNode.add(node);
-                        matchTreeModel.nodesWereInserted(parentNode, new int[] { parentNode.getIndex(node) });
-                        pathMap.put(pathSoFar, node);
-                    }
-                    parentNode = node;
+                node = pathMap.get(parentPath);
+                if (node == null) {
+                    node = new DefaultMutableTreeNode(parentPath);
+                    parentNode.add(node);
+                    matchTreeModel.nodesWereInserted(parentNode,
+                                                     new int[] { parentNode.getIndex(node) });
+                    pathMap.put(parentPath, node);
                 }
             }
             return node;

@@ -42,7 +42,7 @@ public class FileSearcher {
             CharSequence currentLine = charSequence.subSequence(start, end);
             patternMatcher.reset(currentLine);
             if (patternMatcher.find()) {
-                matches.add(":" + lineNumber + ":" + currentLine);
+                matches.add(lineNumber + ": " + currentLine.toString().trim());
             }
             start = end + 1;
         }

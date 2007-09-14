@@ -1,3 +1,8 @@
+2007-09-14  Alex Graveley  <alex@beatniksoftware.com>
+
+	* src/e/edit/FindInFilesPanel.java: Collapse parent directory nodes, 
+	so matches are at most 1-level deep.  Remove leading ":" from matches.
+
 2007-09-13  Alex Graveley  <alex@beatniksoftware.com>
 
 	* src/e/edit/EErrorsPanel.java: New, replaces the errors window

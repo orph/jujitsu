@@ -2,7 +2,6 @@
 Jujitsu TODO
 ============
 
-* Inline file browse, find, build
 * Command-Colon command entry
     * open, grep, save, kill, quit, etc
 * Kill workspaces
@@ -22,7 +21,20 @@ Jujitsu TODO
 * Use diff view for replace window?
 * Limit spellcheck to comments
 * View->Increase/Decrease Text Size
-* Create ChangeLog entry
+* Create ChangeLog action
+* List open buffers in open sidebar
+* List visited files in find sidebar first
+* Sidebar focus issues
+* List all symbols from opened buffers
+* Color code class/file names in open/find/symbol sidebars
+* Context sidebar
+    * Function callers
+    * Locals
+    * Arguments
+    * Compile Errors
+* Buffer title bar
+    * source/header link toggle
+    * diff -- view changes since save
 
 
 DONE
@@ -32,3 +44,4 @@ DONE
 * Colored text background
 * Block cursor
 * Use current file's directory in Open/Save As dialogs
+* Inline file browse, find, build

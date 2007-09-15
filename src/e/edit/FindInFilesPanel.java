@@ -55,7 +55,14 @@ public class FindInFilesPanel extends JPanel implements WorkspaceFileList.Listen
             if (window instanceof ETextWindow) {
                 ETextWindow textWindow = (ETextWindow) window;
                 FindAction.INSTANCE.findInText(textWindow, PatternUtilities.toString(pattern));
-                final int lineNumber = Integer.parseInt(line.substring(0, line.indexOf(':', 1)));
+                
+                String noHTMLLine = line;
+                if (line.startsWith("<html>")) {
+                    noHTMLLine = line.replaceAll("\\<.*?>","");
+                }
+                
+                int lineNumber = Integer.parseInt(
+                    noHTMLLine.substring(0, noHTMLLine.indexOf(':', 1)));
                 textWindow.getTextArea().goToLine(lineNumber);
             }
         }
@@ -131,15 +138,14 @@ public class FindInFilesPanel extends JPanel implements WorkspaceFileList.Listen
             }
         }
         
+        public Color getBackgroundColor() {
+            return GraphicsUtilities.getColorForFilename(workspace.prependRootDirectory(name));
+        }
+        
         public String toString() {
             StringBuilder result = new StringBuilder(file.getName());
             if (matchCount != 0) {
-                result.append(" (");
-                result.append(StringUtilities.pluralize(matchCount, "matching line", "matching lines"));
-                if (containsDefinition) {
-                    result.append(" including definition");
-                }
-                result.append(")");
+                result.append(" (" + matchCount + ")");
             }
             return result.toString();
         }
@@ -407,7 +413,10 @@ public class FindInFilesPanel extends JPanel implements WorkspaceFileList.Listen
         matchView.setCellRenderer(new MatchTreeCellRenderer());
         TreeCellRenderer renderer = matchView.getCellRenderer();
         JComponent rendererComponent = (JComponent) renderer.getTreeCellRendererComponent(matchView, new DefaultMutableTreeNode("Hello"), true, true, true, 0, true);
+        
         matchView.setRowHeight(rendererComponent.getPreferredSize().height);
+        // NOTE: Setting 0 row height will allow different rows to have different sizes
+        //matchView.setRowHeight(0);
         matchView.setLargeModel(true);
         
         matchView.addTreeSelectionListener(new TreeSelectionListener() {
@@ -471,14 +480,17 @@ public class FindInFilesPanel extends JPanel implements WorkspaceFileList.Listen
                 setText(text.replaceAll("\t", "    "));
             }
             
+            DefaultTreeCellRenderer render = (DefaultTreeCellRenderer) c;
             DefaultMutableTreeNode node = (DefaultMutableTreeNode) value;
+            
             if (node.getUserObject() instanceof MatchingFile) {
                 MatchingFile file = (MatchingFile) node.getUserObject();
                 if (file.containsDefinition()) {
                     c.setFont(c.getFont().deriveFont(Font.BOLD));
                 }
+                render.setBackgroundNonSelectionColor(file.getBackgroundColor());
             } else {
-                c.setForeground(Color.GRAY);
+                render.setBackgroundNonSelectionColor(Color.WHITE);
             }
             
             c.setEnabled(tree.isEnabled());

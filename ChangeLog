@@ -1,3 +1,18 @@
+2007-09-15  Alex Graveley  <alex@beatniksoftware.com>
+
+	* src/e/util/GraphicsUtilities.java: Move getColorForFilename here
+	from ETextWindow.  Raise the color segments to 24 from 16.
+
+	* src/e/util/FileSearcher.java: Highlight matching line segments
+	in black italics.
+
+	* src/e/edit/ETextWindow.java: Call
+	GraphicsUtilities.getColorForFilename.
+
+	* src/e/edit/FindInFilesPanel.java: Show only the match count in
+	parens, to save space.  Set the row bg color based on filename,
+	like buffer bg.
+
 2007-09-14  Alex Graveley  <alex@beatniksoftware.com>
 
 	* src/e/edit/FindInFilesPanel.java: Collapse parent directory nodes, 

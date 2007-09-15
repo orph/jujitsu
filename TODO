@@ -35,6 +35,8 @@ Jujitsu TODO
 * Buffer title bar
     * source/header link toggle
     * diff -- view changes since save
+* Make undo group multiple keypresses as single words
+* Fix tabbing
 
 
 DONE

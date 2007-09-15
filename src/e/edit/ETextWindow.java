@@ -87,7 +87,7 @@ public class ETextWindow extends EWindow implements PTextListener {
         textArea.getTextBuffer().addTextListener(this);
         initTextAreaPopupMenu();
 
-        this.textArea.setBackground(getColorForFilename(filename));
+        this.textArea.setBackground(GraphicsUtilities.getColorForFilename(filename));
         
         this.watermarkViewPort = new WatermarkViewPort();
         watermarkViewPort.setView(textArea);
@@ -119,11 +119,6 @@ public class ETextWindow extends EWindow implements PTextListener {
         textArea.setFont(ChangeFontAction.getAppropriateFontForContent(content));
         textArea.getTextBuffer().putProperty(PTextBuffer.INDENTATION_PROPERTY, IndentationGuesser.guessIndentationFromFile(content));
     }
-
-    public Color getColorForFilename(String filename) {
-        float hue = (Math.abs(filename.hashCode()) % 16) / 16.0f;
-        return Color.getHSBColor(hue, 0.25f, 0.95f);
-    }   
     
     public void updateStatusLine() {
         final int selectionStart = textArea.getSelectionStart();

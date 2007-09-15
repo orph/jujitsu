@@ -40,9 +40,24 @@ public class FileSearcher {
         for (int lineNumber = 1; start < charSequence.length(); lineNumber++) {
             int end = findEndOfLine(charSequence, start);
             CharSequence currentLine = charSequence.subSequence(start, end);
+            
             patternMatcher.reset(currentLine);
-            if (patternMatcher.find()) {
-                matches.add(lineNumber + ": " + currentLine.toString().trim());
+            
+            StringBuffer lineBuf = new StringBuffer();
+            boolean found = false;
+            
+            while (patternMatcher.find()) {
+                found = true;
+                patternMatcher.appendReplacement(
+                    lineBuf,
+                    "<font color=\"black\"><i>$0</i></font>");
+            }
+            patternMatcher.appendTail(lineBuf);
+            
+            if (found) {
+                matches.add("<html><font color=\"gray\">" +
+                            lineNumber + ": " + lineBuf.toString().trim() +
+                            "</font></html>");
             }
             start = end + 1;
         }

@@ -5,6 +5,11 @@ import java.awt.*;
 public class GraphicsUtilities {
     private GraphicsUtilities() { /* Not instantiable. */ }
     
+    public static Color getColorForFilename(String filename) {
+        float hue = (Math.abs(filename.hashCode()) % 24) / 24.0f;
+        return Color.getHSBColor(hue, 0.25f, 0.95f);
+    }
+    
     /**
      * Paints the background using a paper effect similar to that in Mac OS X. The
      * first line in the pattern is brightest, followed by one medium gray, one dark

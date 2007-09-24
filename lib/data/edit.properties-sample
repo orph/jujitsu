@@ -1,9 +1,9 @@
 font.name=SansSerif
 font.size=12
 
-fixedFont.default=false
+fixedFont.default=true
 
-hungryDelete=true
+hungryDelete=false
 indent.string=    
 
 files.uninterestingExtensions=.a;.aux;.bak;.bin;.class;.d;.elf;.exe;.jar;.lib;.log;.map;.o;.obj;.orig;.swp;.texshop;.toc

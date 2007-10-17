@@ -69,7 +69,8 @@ public class ShellCommand {
 
         EventQueue.invokeLater(launchRunnable);
         
-        Evergreen.getInstance().showStatus("Started task '" + command + "'");
+        workspace.getErrorsPanel().showStatus("Started task \"" + command + "\"");
+        workspace.getErrorsPanel().taskDidStart();
         
         Thread standardInputPump = new Thread(new Runnable() {
             public void run() {
@@ -98,13 +99,13 @@ public class ShellCommand {
                 out.close();
             }
         } catch (Exception ex) {
-            Log.warn("Problem pumping standard input for task '" + command + "'", ex);
-            workspace.getErrorsPanel().append(new String[] { "Problem pumping standard input for task '" + command + "': " + ex.getMessage() + "." });
+            Log.warn("Problem pumping standard input for task \"" + command + "\"", ex);
+            workspace.getErrorsPanel().append(new String[] { "Problem pumping standard input for task \"" + command + "\": " + ex.getMessage() + "." });
         } finally {
             try {
                 os.close();
             } catch (IOException ex) {
-                workspace.getErrorsPanel().append(new String[] { "Couldn't close standard input for task '" + command + "': " + ex.getMessage() + "." });
+                workspace.getErrorsPanel().append(new String[] { "Couldn't close standard input for task \"" + command + "\": " + ex.getMessage() + "." });
             }
         }
     }
@@ -163,7 +164,7 @@ public class ShellCommand {
      * Invoked when the StreamMonitors finish, on the EDT.
      */
     private void processFinished(int exitStatus) {
-        Evergreen.getInstance().showStatus("Task '" + command + "' finished");
+        workspace.getErrorsPanel().showStatus("Task \"" + command + "\" finished");
         
         ArrayList<String> errorsWindowFooter = new ArrayList<String>();
         
@@ -199,9 +200,10 @@ public class ShellCommand {
         
         // A non-zero exit status is always potentially interesting.
         if (exitStatus != 0) {
-            errorsWindowFooter.add("Task '" + command + "' failed with exit status " + exitStatus);
+            errorsWindowFooter.add("Task \"" + command + "\" failed with exit status " + exitStatus);
         }
         workspace.getErrorsPanel().append(errorsWindowFooter.toArray(new String[errorsWindowFooter.size()]));
+        workspace.getErrorsPanel().taskDidExit(exitStatus);
     }
     
     /**

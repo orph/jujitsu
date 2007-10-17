@@ -37,18 +37,22 @@ public class EErrorsPanel extends JPanel {
     
     private final Workspace workspace;
     private PTextArea textArea;
+    private EStatusBar statusBar;
+    private int currentBuildErrorCount;
     
     public EErrorsPanel(Workspace workspace) {
         super(new BorderLayout());
-        setName("+Errors");
+        setName("Build Output");
         
         this.workspace = workspace;
         
         initTextArea();
+        initStatusBar();
         
         JScrollPane scrollPane = new JScrollPane(textArea, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
         GuiUtilities.keepMaximumShowing(scrollPane.getVerticalScrollBar());
         add(scrollPane, BorderLayout.CENTER);
+        add(statusBar, BorderLayout.SOUTH);
     }
     
     private void initTextArea() {
@@ -61,7 +65,38 @@ public class EErrorsPanel extends JPanel {
         textArea.setWrapStyleWord(true);
         initTextAreaPopupMenu();
     }
-
+    
+    private void initStatusBar() {
+        statusBar = new EStatusBar();
+    }
+    
+    public void showStatus(String status) {
+        statusBar.setText(status);
+    }
+    
+    public void taskDidStart() {
+        EventQueue.invokeLater(new ClearRunnable());
+        currentBuildErrorCount = 0;
+    }
+    
+    public void taskDidExit(int exitStatus) {
+        if (exitStatus == 0 && currentBuildErrorCount == 0) {
+            Thread waitThenHide = new Thread(new Runnable() {
+                public void run() {
+                    // Add a short pause before hiding, so the user gets chance to see that everything went okay.
+                    try {
+                        Thread.sleep(500);
+                    } catch (Exception ex) {
+                    }
+                    // Now hide.
+                    // We invokeLater because append does, and we might need to catch up with pending output before hiding.
+                    EventQueue.invokeLater(new HideRunnable());
+                }
+            });
+            waitThenHide.start();
+        }
+    }
+    
     private class ErrorLinkStyler extends RegularExpressionStyleApplicator {
         /**
          * Matches addresses (such as "filename.ext:line:col:line:col").
@@ -70,7 +105,7 @@ public class EErrorsPanel extends JPanel {
          * We insist that an interesting extension has between 1 and 4 characters, and contains only alphabetic characters.
          * (There's an additional check later that the extension isn't known to be uninteresting, such as ".o" or ".class".)
          */
-        private static final String ADDRESS_PATTERN = "(?:^| |\"|')([^ :\"']+(?:Makefile|\\w+\\.[A-Za-z]{1,4}\\b)([\\d:]+)?)";
+        private static final String ADDRESS_PATTERN = "(?:^| |\"|')([^ :\"']+(?:Makefile|\\w+\\.[A-Za-z]{1,4}\\b)([\\d:]+|\\([\\d,]+\\))?)";
         
         public ErrorLinkStyler(PTextArea textArea) {
             super(textArea, ADDRESS_PATTERN, PStyle.HYPERLINK);
@@ -103,14 +138,22 @@ public class EErrorsPanel extends JPanel {
         }
         
         public void actionPerformed(ActionEvent e) {
-            // We're most useful in providing links to grep matches, so we
-            // need to avoid being confused by stuff like File.java:123.
+            // The link was probably a combination of filename and address within the file.
+            // Break that into the two components.
             String name = address;
             String tail ="";
             int colonIndex = name.indexOf(':');
             if (colonIndex != -1) {
+                // A traditional Unix error such as "src/Trousers.cpp:109:26: parse error".
                 name = name.substring(0, colonIndex);
                 tail = address.substring(colonIndex);
+            } else if (name.endsWith(")")) {
+                // Maybe a Microsoft-style error such as "src/Trousers.cs(109,26): error CS0103: The name `ferret' does not exist in the context of `Trousers'"?
+                int openParenthesisIndex = name.indexOf('(');
+                if (openParenthesisIndex != -1) {
+                    name = name.substring(0, openParenthesisIndex);
+                    tail = ":" + address.substring(openParenthesisIndex + 1, address.length() - 1).replace(',', ':');
+                }
             }
             
             if (name.startsWith("/") || name.startsWith("~")) {
@@ -169,6 +212,7 @@ public class EErrorsPanel extends JPanel {
         }
         
         public void run() {
+            setVisible(true);
             textArea.append(text);
         }
     }
@@ -180,8 +224,21 @@ public class EErrorsPanel extends JPanel {
             resetAutoScroll();
         }
     }
+
+    private class HideRunnable implements Runnable {
+        public void run() {
+            setVisible(false);
+        }
+    }
     
     public void append(String[] lines) {
+        for (String line : lines) {
+            // FIXME: this is a bit weak, but necessary as long as our builds always "exit 0". The FIXME in this file about treating stderr specially might be a better way forward if we have to keep a hack.
+            if (line.contains("***") || line.contains("warning:")) {
+                ++currentBuildErrorCount;
+            }
+        }
+
         /* Should we show the error dialog now, or later? */
         workspace.showErrorsPanel();
         EventQueue.invokeLater(new AppendRunnable(lines));
@@ -189,6 +246,7 @@ public class EErrorsPanel extends JPanel {
     
     public void clear() {
         EventQueue.invokeLater(new ClearRunnable());
+        EventQueue.invokeLater(new HideRunnable());
     }
     
     public void resetAutoScroll() {
@@ -207,14 +265,5 @@ public class EErrorsPanel extends JPanel {
                 actions.add(new KillErrorsAction());
             }
         });
-    }
-    
-    /** Errors windows are never considered dirty because they're not worth preserving. */
-    public boolean isDirty() {
-        return false;
-    }
-    
-    public String getContext() {
-        return "";
     }
 }

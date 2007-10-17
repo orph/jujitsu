@@ -389,7 +389,7 @@ public class FindInFilesPanel extends JPanel implements WorkspaceFileList.Listen
         }
         
         public void taggingFailed(Exception ex) {
-            Log.warn("Failed to use tags to check for a definition.", ex);
+            Log.warn("Failed to use ctags(1) to check for a definition.", ex);
         }
     }
     

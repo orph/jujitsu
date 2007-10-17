@@ -1,6 +1,7 @@
 package e.edit;
 
 import e.util.*;
+import java.awt.Component;
 import java.awt.event.*;
 import javax.swing.*;
 
@@ -25,7 +26,7 @@ public class ShrinkWindowAction extends ETextAction {
             return;
         }
         
-        EWindow newWin = column.cycleWindow(window, 1);
+        Component newWin = column.cycleWindow(window, 1);
         column.expandComponent(newWin);
     }
 }

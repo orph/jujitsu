@@ -41,6 +41,17 @@ public class Workspace extends JPanel {
         
         leftColumn = new EColumn();
         add(leftColumn, BorderLayout.CENTER);
+        leftColumn.addContainerListener(new ContainerListener() {
+            public void componentAdded(ContainerEvent e) {
+                componentCountChanged();
+            }
+            public void componentRemoved(ContainerEvent e) {
+                componentCountChanged();
+            }
+            private void componentCountChanged() {
+                updateTabForWorkspace();
+            }
+        });
     }
     
     public WorkspaceFileList getFileList() {

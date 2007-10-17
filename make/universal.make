@@ -40,7 +40,7 @@ SALMA_HAYEK := ..
 # Work out what we're going to generate.
 # ----------------------------------------------------------------------------
 
-SCRIPT_PATH = make
+BUILD_SCRIPT_PATH = make
 LIB_PATH = lib
 
 
@@ -135,7 +135,7 @@ JDK_ROOT := $(call findMakeFriendlyEquivalentName,$(shell ruby $(JDK_ROOT_SCRIPT
 # We use our own replacement for javah(1).
 # ----------------------------------------------------------------------------
 
-JAVAHPP = $(SCRIPT_PATH)/javahpp.rb
+JAVAHPP = $(BUILD_SCRIPT_PATH)/javahpp
 
 # ----------------------------------------------------------------------------
 # Find the source.
@@ -381,6 +381,10 @@ define GENERATE_CHANGE_LOG.svn
   svn log > ChangeLog
 endef
 
+define GENERATE_CHANGE_LOG.hg
+  hg log > ChangeLog
+endef
+
 define GENERATE_CHANGE_LOG.cvs
   $(if $(shell which cvs2cl),cvs2cl,cvs2cl.pl) --hide-filenames
 endef
@@ -389,22 +393,22 @@ GENERATED_FILES += ChangeLog
 GENERATED_FILES += ChangeLog.html
 GENERATED_FILES += .generated
 
-MAKE_VERSION_FILE_COMMAND = ruby $(SCRIPT_PATH)/make-version-file.rb . .
+MAKE_VERSION_FILE_COMMAND = ruby $(BUILD_SCRIPT_PATH)/make-version-file.rb . .
 # By immediately evaluating this, we cause install-everything.sh (or other building-from-source) to warn:
 # svn: '.' is not a working copy
 # Now we use the version string in the name of the .rpm target, it gets evaluated even if we use = instead of :=.
 VERSION_STRING := $(shell $(MAKE_VERSION_FILE_COMMAND) | tail -1)
 # If you ever need a Debian equivalent of this Windows-specific script:
 # sudo apt-get install uuid
-makeGuid = $(shell $(SCRIPT_PATH)/uuid.rb)
+makeGuid = $(shell $(BUILD_SCRIPT_PATH)/uuid.rb)
 
 # ----------------------------------------------------------------------------
 # Choose a Java compiler.
 # ----------------------------------------------------------------------------
 
-JAVA_COMPILER = $(JDK_ROOT)/bin/javac
+JAVA_COMPILER ?= $(JDK_ROOT)/bin/javac
 ifeq "$(wildcard $(JAVA_COMPILER)$(EXE_SUFFIX))" ""
-  JAVA_COMPILER := $(error Unable to find $(JAVA_COMPILER) --- do you only have a JRE installed?)
+  JAVA_COMPILER := $(error Unable to find $(JAVA_COMPILER) --- do you only have a JRE installed or did you explicitly supply a non-absolute path?)
 endif
 
 # ----------------------------------------------------------------------------
@@ -423,29 +427,42 @@ CLASS_PATH += $(TOOLS_JAR)
 JAVAC_FLAGS += $(addprefix -classpath ,$(call makeNativePath,$(CLASS_PATH)))
 
 # ----------------------------------------------------------------------------
-# Set default javac flags.
+# Set Sun javac flags.
 # ----------------------------------------------------------------------------
 
-JAVAC_FLAGS += -d .generated/classes/
-JAVAC_FLAGS += -sourcepath src/
-JAVAC_FLAGS += -g
+JAVAC_FLAGS.javac += -d .generated/classes/
+JAVAC_FLAGS.javac += -sourcepath src/
+JAVAC_FLAGS.javac += -g
 
 # Turn on warnings.
-JAVAC_FLAGS += -deprecation
-JAVAC_FLAGS += -Xlint:all -Xlint:-serial
+JAVAC_FLAGS.javac += -deprecation
+JAVAC_FLAGS.javac += -Xlint:all -Xlint:-serial
 
-# We should also ensure that we build class files that can be used on
-# the current Java release, regardless of where we build.
-JAVAC_FLAGS += -target 1.5
+# We should also ensure that we build class files that can be used on the current Java release, regardless of where we build.
+JAVAC_FLAGS.javac += -target 1.5
 
-# Ensure we give a clear error if the user attempts to use anything older
-# than Java 5.
-JAVAC_FLAGS += -source 1.5
+# Ensure we give a clear error if the user attempts to use anything older than Java 5.
+JAVAC_FLAGS.javac += -source 1.5
 
 # javac(1) warns if you build source containing characters unrepresentable
 # in your locale. Although we all use UTF-8 locales, we can't guarantee that
 # everyone else does, so let the compiler know that our source is in UTF-8.
 JAVAC_FLAGS += -encoding UTF-8
+
+# ----------------------------------------------------------------------------
+# Set GCJ flags.
+# ----------------------------------------------------------------------------
+
+JAVAC_FLAGS.gcj += -Wall -Wdeprecated
+JAVAC_FLAGS.gcj += -Wno-indirect-static
+JAVAC_FLAGS.gcj += -Wno-serial
+JAVAC_FLAGS.gcj += -combine
+JAVAC_FLAGS.gcj += -encoding UTF-8
+JAVAC_FLAGS.gcj += --main=$(GCJ_MAIN_CLASS)
+JAVAC_FLAGS.gcj += -o $(MACHINE_PROJECT_NAME)
+
+# Combine the compiler-specific flags with the portable flags.
+JAVAC_FLAGS += $(JAVAC_FLAGS.$(notdir $(JAVA_COMPILER)))
 
 # It's not helpful to list all the Java source files.
 define BUILD_JAVA
@@ -464,7 +481,7 @@ endef
 
 # We get the shell to find candle and light on the path but we mention
 # file-list-to-wxi in a prerequisite and so must know its exact location.
-FILE_LIST_TO_WXI = $(SCRIPT_PATH)/file-list-to-wxi.rb
+FILE_LIST_TO_WXI = $(BUILD_SCRIPT_PATH)/file-list-to-wxi.rb
 
 WIX_COMPILATION_DIRECTORY = .generated/WiX
 
@@ -592,7 +609,7 @@ native-clean:
 
 ChangeLog.html: ChangeLog
 	$(RM) $@ && \
-	ruby $(SCRIPT_PATH)/svn-log-to-html.rb < $< > $@
+	ruby $(BUILD_SCRIPT_PATH)/svn-log-to-html.rb < $< > $@
 
 .PHONY: ChangeLog
 ChangeLog:
@@ -610,7 +627,7 @@ source-dist: ../$(SOURCE_DIST_FILE)
 # The ChangeLog is generated too!
 ../$(SOURCE_DIST_FILE): ChangeLog .generated/build-revision.txt
 	cd .. && \
-	tar -X make/dist-exclude -zcf $(SOURCE_DIST_FILE) $(PROJECT_DIRECTORY_BASE_NAME)/* $(PROJECT_DIRECTORY_BASE_NAME)/.generated/build-revision.txt
+	tar -X $(BUILD_SCRIPT_PATH)/dist-exclude -zcf $(SOURCE_DIST_FILE) $(PROJECT_DIRECTORY_BASE_NAME)/* $(PROJECT_DIRECTORY_BASE_NAME)/.generated/build-revision.txt
 
 # This is only designed to be run on jessies.org itself.
 .PHONY: www-dist
@@ -647,7 +664,7 @@ installer-file-list:
 # Unfortunately, the start-up scripts tend to go looking for salma-hayek, so we can't just have Resources/bin etc; we have to keep the multi-directory structure, at least for now.
 .PHONY: $(MACHINE_PROJECT_NAME).app
 $(MACHINE_PROJECT_NAME).app: build .generated/build-revision.txt
-	$(SCRIPT_PATH)/package-for-distribution.rb $(HUMAN_PROJECT_NAME) $(MACHINE_PROJECT_NAME) .
+	$(BUILD_SCRIPT_PATH)/package-for-distribution.rb $(HUMAN_PROJECT_NAME) $(MACHINE_PROJECT_NAME) .
 
 # For a comparison of the major choices available at the time, see:
 # http://elliotth.blogspot.com/2007/05/choosing-best-disk-image-format-on-mac.html
@@ -842,7 +859,7 @@ run-installer.deb:
 
 .PHONY: run-installer.rpm
 run-installer.rpm:
-	@echo Installing the .rpm might be possible with sudo rpm -i $(INSTALLER.rpm) but that would be a bad idea on a Debian box...
+	@echo To install the .rpm, run "sudo rpm -i $(INSTALLER.rpm)".
 
 .PHONY: run-installer.dmg
 run-installer.dmg:
@@ -866,3 +883,7 @@ run-remover.msi:
 test:
 	@echo Testing...
 	./tests/run_tests
+
+.PHONY: gcj
+gcj:
+	rm -rf .generated && JAVA_COMPILER=/usr/bin/gcj make && rm -rf .generated && make && sudo mv $(MACHINE_PROJECT_NAME) /usr/bin

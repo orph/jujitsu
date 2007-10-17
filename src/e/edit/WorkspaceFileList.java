@@ -5,7 +5,6 @@ import java.io.*;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.regex.*;
-import javax.swing.event.*;
 import org.jdesktop.swingworker.SwingWorker;
 
 public class WorkspaceFileList {
@@ -15,7 +14,6 @@ public class WorkspaceFileList {
     private HashMap<String, String> minPathFileList;
     
     private FileAlterationMonitor fileAlterationMonitor;
-    private String fileAlterationMonitorRoot;
     private ExecutorService fileListUpdateExecutorService;
     
     private ArrayList<Listener> listeners = new ArrayList<Listener>();
@@ -104,12 +102,10 @@ public class WorkspaceFileList {
         if (fileAlterationMonitor != null) {
             fileAlterationMonitor.dispose();
             fileAlterationMonitor = null;
-            fileAlterationMonitorRoot = null;
         }
         
         // We have one thread to check for last-modified time changes...
         this.fileAlterationMonitor = new FileAlterationMonitor(rootDirectory);
-        this.fileAlterationMonitorRoot = rootDirectory;
         // And another thread to update our list of files...
         this.fileListUpdateExecutorService = ThreadUtilities.newSingleThreadExecutor("File List Updater for " + rootDirectory);
         

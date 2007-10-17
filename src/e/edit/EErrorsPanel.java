@@ -35,24 +35,50 @@ public class EErrorsPanel extends JPanel {
      */
     private static final Pattern JAVA_STACK_TRACE_PATTERN = Pattern.compile("([\\.\\w]+)(?:(?:\\$\\w+)*?\\.)[\\w\\$<>]+\\(\\w+\\.java(:\\d+)");
     
+    private static final KillErrorsAction KILL_ERRORS_ACTION = new KillErrorsAction();
+
     private final Workspace workspace;
+    private JButton killButton;
     private PTextArea textArea;
     private EStatusBar statusBar;
     private int currentBuildErrorCount;
+    private Process process;
     
     public EErrorsPanel(Workspace workspace) {
         super(new BorderLayout());
         setName("Build Output");
         
         this.workspace = workspace;
-        
+
+        initKillButton();
         initTextArea();
         initStatusBar();
         
         JScrollPane scrollPane = new JScrollPane(textArea, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
         GuiUtilities.keepMaximumShowing(scrollPane.getVerticalScrollBar());
+
+        JPanel bottomLine = new JPanel(new BorderLayout(4, 0));
+        bottomLine.add(killButton, BorderLayout.WEST);
+        bottomLine.add(statusBar, BorderLayout.CENTER);
+
         add(scrollPane, BorderLayout.CENTER);
-        add(statusBar, BorderLayout.SOUTH);
+        add(bottomLine, BorderLayout.SOUTH);
+    }
+
+    private void initKeyboardEquivalents() {
+        final String KILL_ERRORS_ACTION_NAME = "e.edit.KillErrorsAction";
+        getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0, false), KILL_ERRORS_ACTION_NAME);
+        getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put((KeyStroke) KILL_ERRORS_ACTION.getValue(Action.ACCELERATOR_KEY), KILL_ERRORS_ACTION_NAME);
+        getRootPane().getActionMap().put(KILL_ERRORS_ACTION_NAME, KILL_ERRORS_ACTION);
+    }
+     
+    private void initKillButton() {
+        killButton = StopIcon.makeStopButton();
+        killButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                ProcessUtilities.terminateProcess(process);
+            }
+        });
     }
     
     private void initTextArea() {
@@ -64,6 +90,7 @@ public class EErrorsPanel extends JPanel {
         textArea.addStyleApplicator(new ErrorLinkStyler(textArea));
         textArea.setWrapStyleWord(true);
         initTextAreaPopupMenu();
+        initKeyboardEquivalents();
     }
     
     private void initStatusBar() {
@@ -74,12 +101,16 @@ public class EErrorsPanel extends JPanel {
         statusBar.setText(status);
     }
     
-    public void taskDidStart() {
+    public void taskDidStart(Process process) {
         EventQueue.invokeLater(new ClearRunnable());
-        currentBuildErrorCount = 0;
+        this.currentBuildErrorCount = 0;
+        this.process = process;
+        killButton.setEnabled(true);
     }
     
     public void taskDidExit(int exitStatus) {
+        killButton.setEnabled(false);
+        this.process = null;
         if (exitStatus == 0 && currentBuildErrorCount == 0) {
             Thread waitThenHide = new Thread(new Runnable() {
                 public void run() {
@@ -212,7 +243,10 @@ public class EErrorsPanel extends JPanel {
         }
         
         public void run() {
-            setVisible(true);
+            // This conditional stops the errors window from grabbing the focus every time it's updated.
+            if (isVisible() == false) {
+                setVisible(true);
+            }
             textArea.append(text);
         }
     }
@@ -233,7 +267,7 @@ public class EErrorsPanel extends JPanel {
     
     public void append(String[] lines) {
         for (String line : lines) {
-            // FIXME: this is a bit weak, but necessary as long as our builds always "exit 0". The FIXME in this file about treating stderr specially might be a better way forward if we have to keep a hack.
+            // FIXME: this is a bit weak, and no longer necessary for our builds. The FIXME in this file about treating stderr specially might be a better way forward if we want to keep a hack.
             if (line.contains("***") || line.contains("warning:")) {
                 ++currentBuildErrorCount;
             }
@@ -262,7 +296,7 @@ public class EErrorsPanel extends JPanel {
                 actions.add(null);
                 actions.add(new CheckInChangesAction());
                 actions.add(null);
-                actions.add(new KillErrorsAction());
+                actions.add(KILL_ERRORS_ACTION);
             }
         });
     }

@@ -70,7 +70,7 @@ public class ShellCommand {
         EventQueue.invokeLater(launchRunnable);
         
         workspace.getErrorsPanel().showStatus("Started task \"" + command + "\"");
-        workspace.getErrorsPanel().taskDidStart();
+        workspace.getErrorsPanel().taskDidStart(process);
         
         Thread standardInputPump = new Thread(new Runnable() {
             public void run() {
@@ -165,9 +165,7 @@ public class ShellCommand {
      */
     private void processFinished(int exitStatus) {
         workspace.getErrorsPanel().showStatus("Task \"" + command + "\" finished");
-        
-        ArrayList<String> errorsWindowFooter = new ArrayList<String>();
-        
+                
         switch (outputDisposition) {
         case CLIPBOARD:
             StringSelection selection = new StringSelection(capturedOutput.toString());
@@ -183,7 +181,6 @@ public class ShellCommand {
             break;
         case ERRORS_WINDOW:
             // We dealt with the sub-process output as we went along.
-            errorsWindowFooter.add("-------------------------------------------------------------------------");
             break;
         case INSERT:
             textWindow.getTextArea().insert(capturedOutput);
@@ -200,9 +197,8 @@ public class ShellCommand {
         
         // A non-zero exit status is always potentially interesting.
         if (exitStatus != 0) {
-            errorsWindowFooter.add("Task \"" + command + "\" failed with exit status " + exitStatus);
+            workspace.getErrorsPanel().append(new String[] { "Task \"" + command + "\" failed with exit status " + exitStatus });
         }
-        workspace.getErrorsPanel().append(errorsWindowFooter.toArray(new String[errorsWindowFooter.size()]));
         workspace.getErrorsPanel().taskDidExit(exitStatus);
     }
     

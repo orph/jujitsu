@@ -94,7 +94,6 @@ public class FindInFilesPanel extends JPanel implements WorkspaceFileList.Listen
             this.name = name;
             this.matchCount = matchCount;
             this.pattern = pattern;
-            this.containsDefinition = containsDefinition;
             if (pattern != null) {
                 definitionFinderExecutor.submit(new DefinitionFinder(file, pattern, this));
             }
@@ -394,11 +393,10 @@ public class FindInFilesPanel extends JPanel implements WorkspaceFileList.Listen
     }
     
     public synchronized void showMatches() {
-        if (matchView.isShowing() == false) {
-            // There's no point doing a search if the user can't see the results.
-            return;
+        // Only bother if the user can see the results, and we're not currently rescanning the index.
+        if (matchView.isShowing() && workspace.getFileList().getIndexedFileCount() != -1) {
+            new Thread(new FileFinder(), "Find in Files for " + workspace.getTitle()).start();
         }
-        new Thread(new FileFinder(), "Find in Files for " + workspace.getTitle()).start();
     }
     
     public void initMatchList() {

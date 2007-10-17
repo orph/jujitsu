@@ -77,11 +77,15 @@ public class FileUtilities {
      * Returns the user's home directory. Assumes that on Cygwin a user
      * who's set $HOME wants it to override Windows' notion of the home
      * directory, which is what the "user.home" system property gets you.
+     * Removes any trailing File.separators.
      */
     public static String getUserHomeDirectory() {
         String result = System.getenv("HOME");
         if (result == null) {
             result = System.getProperty("user.home");
+        }
+        if (result != null && result.endsWith(File.separator)) {
+            result = result.replaceAll(File.separator + "+$", "");
         }
         return result;
     }
@@ -193,36 +197,6 @@ public class FileUtilities {
         } catch (IOException ex) {
             return false;
         }
-    }
-    
-    /**
-     * Returns an array with an item for each semicolon-separated element of the path.
-     * FIXME: the use of ";" is bogus.
-     */
-    public static String[] getArrayOfPathElements(String path) {
-        return path.split(";");
-    }
-    
-    public static boolean nameEndsWithOneOf(File file, String[] extensions) {
-        return nameEndsWithOneOf(file.toString(), extensions);
-    }
-    
-    public static boolean nameEndsWithOneOf(String name, String[] extensions) {
-        for (String extension : extensions) {
-            if (name.endsWith(extension)) {
-                return true;
-            }
-        }
-        return false;
-    }
-    
-    public static boolean nameStartsWithOneOf(String name, String[] prefixes) {
-        for (String prefix : prefixes) {
-            if (name.startsWith(prefix)) {
-                return true;
-            }
-        }
-        return false;
     }
     
     /**

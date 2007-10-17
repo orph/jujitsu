@@ -4,7 +4,7 @@
 require "pathname.rb"
 salma_hayek = Pathname.new(__FILE__).realpath().dirname().dirname()
 
-require "make/uuid.rb"
+require "#{salma_hayek}/make/uuid.rb"
 
 directoryPathToFileNames = Hash.new() {
   |hash, directoryPath|

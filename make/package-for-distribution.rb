@@ -12,9 +12,9 @@ def usage()
     die("usage: #{$0} <human_project_name> <machine_project_name> <salma-hayek-path>")
 end
 
-def make_info_plist(app_dir, machine_project_name, human_project_name)
+def make_info_plist(app_contents_dir, machine_project_name, human_project_name, version)
     # Create a minimal "Info.plist".
-    File.open("#{app_dir}/Info.plist", "w") {
+    File.open("#{app_contents_dir}/Info.plist", "w") {
         |file|
         # http://developer.apple.com/documentation/MacOSX/Conceptual/BPRuntimeConfig/index.html
         # Contrary to the documentation, CFBundleIconFile must end ".icns".
@@ -33,6 +33,8 @@ def make_info_plist(app_dir, machine_project_name, human_project_name)
   <string>APPL</string>
   <key>CFBundleSignature</key>
   <string>????</string>
+  <key>CFBundleVersion</key>
+  <string>#{version}</string>
  </dict>
 </plist>
 EOS
@@ -105,8 +107,8 @@ human_project_name = ARGV.shift()
 machine_project_name = ARGV.shift()
 salma_hayek = ARGV.shift()
 
-require "lib/invoke-java.rb"
-require "lib/target-os.rb"
+require "#{salma_hayek}/lib/invoke-java.rb"
+require "#{salma_hayek}/lib/target-os.rb"
 
 native_name_for_bundle = nil
 if target_os() == "Darwin"
@@ -140,6 +142,10 @@ tmp_dir = ".generated/native/#{target_directory()}/#{machine_project_name}"
 FileUtils.rm_rf(tmp_dir)
 FileUtils.mkdir_p(tmp_dir)
 
+# Most packaging systems need a constrained form of version number.
+require "#{salma_hayek}/make/make-version-file.rb"
+compressed_version_number = makeVersionString(".", salma_hayek)
+
 if target_os() == "Linux"
     app_dir = "#{tmp_dir}/usr/share/#{machine_project_name}"
     FileUtils.mkdir_p(app_dir)
@@ -151,15 +157,11 @@ elsif target_os() == "Darwin"
     app_dir = "#{tmp_dir}/#{human_project_name}.app/Contents"
     FileUtils.mkdir_p("#{app_dir}/MacOS")
     system("echo -n 'APPL????' > #{app_dir}/PkgInfo")
-    make_info_plist(app_dir, machine_project_name, human_project_name)
+    make_info_plist(app_dir, machine_project_name, human_project_name, compressed_version_number)
 elsif target_os() == "Cygwin"
     app_dir = "#{tmp_dir}"
 end
-
-resources_dir = "#{app_dir}"
-if target_os() == "Darwin"
-    resources_dir = "#{app_dir}/Resources"
-end
+resources_dir = "#{app_dir}/Resources"
 FileUtils.mkdir_p(resources_dir)
 
 def copy_files_for_installation(src_root_directory, dst_root_directory)
@@ -188,6 +190,8 @@ end
 # Copy this project's individual files.
 project_resource_directory = "#{resources_dir}/#{machine_project_name}"
 copy_files_for_installation(".", project_resource_directory)
+### Copy the files we'll install from salma-hayek.
+#copy_files_for_installation(salma_hayek, "#{resources_dir}/salma-hayek")
 
 # Generate a single JAR file containing both the project's unique classes and all the classes from the salma-hayek library.
 # We have to do this in two stages to avoid a "java.util.zip.ZipException: duplicate entry:" error from jar(1) for cases where both trees share a package prefix.
@@ -197,6 +201,9 @@ jar_filename = Pathname.new("#{project_resource_directory}").realpath() + ".gene
 # Using chdir rather than jar -C saves converting more pathnames to JVM-compatible format.
 Dir.chdir(".generated/classes/") {
     spawnWithoutShell(["jar", "cf", convert_to_jvm_compatible_pathname(jar_filename), "."])
+}
+Dir.chdir("#{salma_hayek}/.generated/classes/") {
+    spawnWithoutShell(["jar", "uf", convert_to_jvm_compatible_pathname(jar_filename), "."])
 }
 
 if target_os() == "Darwin"
@@ -208,16 +215,19 @@ if target_os() == "Darwin"
     File.open(script_name, "w") {
         |file|
         file.puts("#!/bin/bash --login")
+        
+        file.puts("# Find our Resources/ directory.")
+        file.puts("resources=`ruby -rpathname -e 'puts(Pathname.new(ARGV[0]).realpath().dirname().dirname() + \"Resources\")' \"$0\"`")
+        
         file.puts("# We started Bash as a login shell so that our application has access to the user's expected path.")
         file.puts("# Finder seems to start applications in /.")
-        file.puts("# Most users will be more comfortable in their home directory. This is especially true of Terminator.")
+        file.puts("# Most users will be more comfortable in their home directory, especially when running Terminator.")
         file.puts("cd")
         
-        file.puts("# Applications started with a double-click have useless (to us) arguments specifying")
-        file.puts("# process serial number.  Strip leading examples of such before they interfere.")
+        file.puts("# Applications started with a double-click have useless (to us) arguments specifying process serial number.")
+        file.puts("# Strip leading examples of such before they interfere.")
         file.puts("while [[ \"${1:0:5}\" = \"-psn_\" ]]; do shift; done")
         
-        file.puts("resources=`dirname \"$0\"`/../Resources")
         file.puts("\"$resources/lib/ensure-suitable-mac-os-version.rb\" && exec \"$resources/#{machine_project_name}/bin/#{machine_project_name}\" \"$@\"")
     }
     system("chmod a+x #{script_name}")
@@ -319,12 +329,7 @@ if target_os() == "Linux"
         # Description (mandatory)
         
         control.puts("Package: #{debian_package_name}")
-        
-        # Use the same artificial version number as we use for the ".msi" installer.
-        require "make/make-version-file.rb"
-        version = makeVersionString(".", salma_hayek)
-        control.puts("Version: #{version}")
-        
+        control.puts("Version: #{compressed_version_number}")
         control.puts("Priority: optional")
         
         # Our use of the architecture field is a bit bogus.
@@ -410,12 +415,7 @@ if target_os() == "SunOS"
         pkginfo.puts("PKG=#{sunos_package_name}")
         pkginfo.puts("NAME=#{human_project_name} - #{generate_generic_package_description(human_project_name)}")
         pkginfo.puts("DESC=#{extract_package_description_from_html()}")
-        
-        # Use the same artificial version number as we use for the ".msi" installer.
-        require "make/make-version-file.rb"
-        version = makeVersionString(".", salma_hayek)
-        pkginfo.puts("VERSION=#{version}")
-        
+        pkginfo.puts("VERSION=#{compressed_version_number}")
         pkginfo.puts("CATEGORY=application")
         pkginfo.puts("VENDOR=http://beatniksoftware.com/")
         pkginfo.puts("EMAIL=alex@beatniksoftware.com")

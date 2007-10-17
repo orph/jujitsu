@@ -4,12 +4,10 @@ import e.gui.*;
 import e.util.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.io.*;
 import java.util.*;
 import java.util.List;
 import java.util.regex.*;
 import javax.swing.*;
-import javax.swing.event.*;
 import org.jdesktop.swingworker.SwingWorker;
 
 /**
@@ -77,6 +75,7 @@ public class OpenQuicklyPanel extends JPanel implements WorkspaceFileList.Listen
         public void done() {
             setStatus(statusGood, statusText);
             matchList.setModel(model);
+            matchList.setEnabled(true);
             // If we don't set the selected index, the user won't be able to cycle the focus into the list with the Tab key.
             // This also means the user can just hit Return if there's only one match.
             matchList.setSelectedIndex(0);
@@ -84,7 +83,10 @@ public class OpenQuicklyPanel extends JPanel implements WorkspaceFileList.Listen
     }
     
     public synchronized void showMatches() {
-        new MatchFinder(filenameField.getText()).execute();
+        // Only bother if the user can see the results, and we're not currently rescanning the index.
+        if (matchList.isShowing() && workspace.getFileList().getIndexedFileCount() != -1) {
+            new MatchFinder(filenameField.getText()).execute();
+        }
     }
     
     private void openFileAtIndex(int index) {
@@ -218,6 +220,7 @@ public class OpenQuicklyPanel extends JPanel implements WorkspaceFileList.Listen
         DefaultListModel model = new DefaultListModel();
         model.addElement("Rescan in progress...");
         matchList.setModel(model);
+        matchList.setEnabled(false);
     }
     
     public void openSelectedFilesFromList() {

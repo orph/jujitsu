@@ -1,3 +1,8 @@
+2007-10-20  Alex Graveley  <alex@beatniksoftware.com>
+
+	* src/e/gui/AboutBox.java: Fix post-merge startup crash, wherein
+	build-revision.txt wasn't being found.
+
 2007-09-15  Alex Graveley  <alex@beatniksoftware.com>
 
 	* src/e/util/GraphicsUtilities.java: Move getColorForFilename here

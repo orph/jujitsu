@@ -101,9 +101,18 @@ final class PTextAreaRenderer {
                 int caretX = x + segment.getDisplayWidth(metrics, x, caretOffset - segment.getOffset());
                 paintCaret(caretX, baseline);
             }
-
-            g.setColor(overrideColor != null ? overrideColor : segment.getStyle().getColor());
-            segment.paint(g, x, baseline);
+            
+            PStyle style = segment.getStyle();
+            g.setColor(overrideColor != null ? overrideColor : style.getColor());
+            if (style.isBold() || style.isItalic()) {
+                Font orig = g.getFont();
+                g.setFont(orig.deriveFont((style.isBold() ? Font.BOLD : 0) +
+                                          (style.isItalic() ? Font.ITALIC : 0)));
+                segment.paint(g, x, baseline);
+                g.setFont(orig);
+            } else {
+                segment.paint(g, x, baseline);
+            }
 
             x += segment.getDisplayWidth(metrics, x);
             if (segment.isNewline()) {

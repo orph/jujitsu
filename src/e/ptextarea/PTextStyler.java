@@ -22,4 +22,9 @@ public interface PTextStyler {
      * the keywords.
      */
     public void addKeywordsTo(Collection<String> collection);
+    
+    /**
+     * Adds this language's basic type names to the given collection.
+     */
+    public void addTypesTo(Collection<String> collection);
 }

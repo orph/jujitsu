@@ -12,33 +12,26 @@ public class PJavaTextStyler extends PAbstractLanguageStyler {
         // JLS3, section 3.9: "Keywords"
         "abstract",
         "assert",
-        "boolean",
         "break",
-        "byte",
         "case",
         "catch",
-        "char",
         "class",
         "const",
         "continue",
         "default",
         "do",
-        "double",
         "else",
         "enum",
         "extends",
         "final",
         "finally",
-        "float",
         "for",
         "if",
         "goto",
         "implements",
         "import",
         "instanceof",
-        "int",
         "interface",
-        "long",
         "native",
         "new",
         "package",
@@ -46,7 +39,6 @@ public class PJavaTextStyler extends PAbstractLanguageStyler {
         "protected",
         "public",
         "return",
-        "short",
         "static",
         "strictfp",
         "super",
@@ -57,7 +49,6 @@ public class PJavaTextStyler extends PAbstractLanguageStyler {
         "throws",
         "transient",
         "try",
-        "void",
         "volatile",
         "while",
         
@@ -66,6 +57,26 @@ public class PJavaTextStyler extends PAbstractLanguageStyler {
         
         // JLS3, section 3.10.7: "The Null Literal"
         "null",
+    };
+    
+    private static final String[] TYPES = new String[] {
+        // Java basic types
+        "boolean",
+        "byte",
+        "char",
+        "double",
+        "float",
+        "int",
+        "long",
+        "short",
+        "void",
+        
+        // java.lang
+        // FIXME: Either remove or really populate
+        "String",
+        "Class",
+        "Object",
+        "Exception",
     };
     
     public PJavaTextStyler(PTextArea textArea) {
@@ -199,8 +210,12 @@ public class PJavaTextStyler extends PAbstractLanguageStyler {
     protected boolean supportMultiLineComments() {
         return true;
     }
-    
+        
     public void addKeywordsTo(Collection<String> collection) {
         collection.addAll(Arrays.asList(KEYWORDS));
+    }
+    
+    public void addTypesTo(Collection<String> collection) {
+        collection.addAll(Arrays.asList(TYPES));
     }
 }

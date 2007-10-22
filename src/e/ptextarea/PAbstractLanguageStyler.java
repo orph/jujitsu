@@ -83,16 +83,25 @@ public abstract class PAbstractLanguageStyler extends PAbstractTextStyler {
         builder.addStyledSegment(end, PStyle.STRING);
     }
     
-    public void initStyleApplicators() {
-        Set<String> keywords;
+    private Set<String> makeKeywordSet() {
         if (keywordsAreCaseSensitive()) {
-            keywords = new HashSet<String>();
+            return new HashSet<String>();
         } else {
-            keywords = new TreeSet<String>(String.CASE_INSENSITIVE_ORDER);
+            return new TreeSet<String>(String.CASE_INSENSITIVE_ORDER);
         }
+    }
+    
+    public void initStyleApplicators() {
+        Set<String> keywords = makeKeywordSet();
         addKeywordsTo(keywords);
         if (keywords.size() > 0) {
-            textArea.addStyleApplicator(new KeywordStyleApplicator(textArea, keywords, getKeywordRegularExpression()));
+            textArea.addStyleApplicator(new KeywordStyleApplicator(textArea, keywords, getKeywordRegularExpression(), PStyle.KEYWORD));
+        }
+        
+        Set<String> types = makeKeywordSet();
+        addTypesTo(types);
+        if (keywords.size() > 0) {
+            textArea.addStyleApplicator(new KeywordStyleApplicator(textArea, types, getKeywordRegularExpression(), PStyle.TYPE));
         }
     }
     

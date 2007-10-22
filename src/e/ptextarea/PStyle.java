@@ -11,6 +11,7 @@ public enum PStyle {
     STRING("string", Color.decode("#0000ff")),
     COMMENT("comment", Color.decode("#227722")),
     KEYWORD("keyword", Color.decode("#770022")),
+    TYPE("type", Color.decode("#2E8B57")),
     ERROR("error", Color.RED),
     HYPERLINK("hyperlink", Color.BLUE),
     PREPROCESSOR("preprocessor", Color.decode("#708090")),
@@ -22,7 +23,7 @@ public enum PStyle {
     
     private String name;
     private Color color;
-    
+        
     private PStyle(String name, Color color) {
         this.name = name;
         this.color = color;
@@ -34,6 +35,15 @@ public enum PStyle {
     
     public Color getColor() {
         return color;
+    }
+    
+    public boolean isBold() {
+        return (this == PStyle.TYPE || 
+                this == PStyle.KEYWORD);
+    }
+    
+    public boolean isItalic() {
+        return (this == PStyle.TYPE);
     }
     
     public boolean isUnderlined() {

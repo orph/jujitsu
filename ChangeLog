@@ -1,5 +1,23 @@
 2007-10-21  Alex Graveley  <alex@beatniksoftware.com>
 
+	* src/e/ptextarea/PJavaTextStyler.java: Add TYPES, used in
+	addTypesTo.  Move basic types here from KEYWORDS.
+	* src/e/ptextarea/PCPPTextStyler.java: Ditto.
+
+	* src/e/ptextarea/PAbstractLanguageStyler.java: Use
+	KeywordStyleApplicator to apply TYPE style.
+
+	* src/e/ptextarea/PStyle.java: Add greenish TYPE style. Types are
+	italic and bold, keywordsjust italic.
+
+	* src/e/ptextarea/PTextAreaRenderer.java: Use bold or italic font
+	if style specifies it.
+
+	* src/e/ptextarea/PTextStyler.java: Add	addTypesTo.
+	* src/e/ptextarea/PAbstractTextStyler.java: Add empty addTypesTo impl. 
+
+2007-10-21  Alex Graveley  <alex@beatniksoftware.com>
+
 	* src/e/gui/AboutBox.java: Use 128px icon.
 
 	* lib/invoke-java.rb: org.jessies -> com.beatniksoftware.

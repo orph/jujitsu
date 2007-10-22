@@ -1,5 +1,13 @@
 2007-10-21  Alex Graveley  <alex@beatniksoftware.com>
 
+	* src/e/edit/EvergreenMenuBar.java: Add right-aligned Project
+	menu, which allows switching the active project.
+
+	* src/e/edit/Evergreen.java: Replace workspace tabs with a single
+	CardLayout-based JPanel.
+
+2007-10-21  Alex Graveley  <alex@beatniksoftware.com>
+
 	* src/e/ptextarea/PJavaTextStyler.java: Add TYPES, used in
 	addTypesTo.  Move basic types here from KEYWORDS.
 	* src/e/ptextarea/PCPPTextStyler.java: Ditto.

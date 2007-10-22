@@ -7,16 +7,22 @@ import java.awt.event.*;
 import javax.swing.*;
 
 public class EvergreenMenuBar extends EMenuBar {
+    private JMenu workspaceMenu;
+    
     public EvergreenMenuBar() {
         add(makeFileMenu());
         add(makeEditMenu());
         add(makeFindMenu());
         add(makeViewMenu());
         add(makeScmMenu());
-        add(makeWorkspaceMenu());
         add(makeToolsMenu());
         add(makeBufferMenu());
         add(makeHelpMenu());
+        
+        add(Box.createHorizontalGlue());
+        
+        workspaceMenu = makeWorkspaceMenu();
+        add(workspaceMenu);
     }
     
     public static class ExitAction extends AbstractAction {
@@ -205,8 +211,8 @@ public class EvergreenMenuBar extends EMenuBar {
     }
     
     private JMenu makeWorkspaceMenu() {
-        JMenu menu = new JMenu("Workspace");
-        menu.setMnemonic('W');
+        JMenu menu = new JMenu("Project");
+        menu.setMnemonic('P');
 
         menu.add(new BuildAction());
         menu.add(new RescanWorkspaceAction());
@@ -218,6 +224,10 @@ public class EvergreenMenuBar extends EMenuBar {
         menu.add(new CycleWorkspacesAction(1));
         menu.add(new CycleWorkspacesAction(-1));
         return menu;
+    }
+    
+    public JMenu getWorkspaceMenu() {
+        return workspaceMenu;
     }
     
     private JMenu makeBufferMenu() {

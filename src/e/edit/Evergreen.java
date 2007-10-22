@@ -22,13 +22,15 @@ public class Evergreen {
     private static Evergreen instance;
     
     private JFrame frame;
-    private JTabbedPane tabbedPane;
+    private JPanel tabbedPane;
     private JSplitPane splitPane;
     private Sidebar sidebar;
     private TagsPanel tagsPanel;
     private EStatusBar statusLine;
     private Minibuffer minibuffer;
     private JPanel statusArea;
+    private EvergreenMenuBar menuBar;
+    private Workspace currentWorkspace;
     
     /** Extensions that we shouldn't open. */
     private String[] externalApplicationExtensions;
@@ -73,7 +75,7 @@ public class Evergreen {
             initialWorkspaces = null;
             
             if (initiallyVisibleWorkspace != null) {
-                tabbedPane.setSelectedComponent(initiallyVisibleWorkspace);
+                showWorkspace(initiallyVisibleWorkspace);
             }
         }
         
@@ -329,7 +331,7 @@ public class Evergreen {
         // Find which workspace this file is on/should be on, and make it visible.
         Workspace workspace = getBestWorkspaceForFilename(filename);
         if (startSignal.getCount() == 0) {
-            tabbedPane.setSelectedComponent(workspace);
+            showWorkspace(workspace);
         }
         
         // If the user already has this file open, we shouldn't open it again.
@@ -344,9 +346,9 @@ public class Evergreen {
     
     /** Returns an array of all the workspaces. */
     public Workspace[] getWorkspaces() {
-        Workspace[] result = new Workspace[tabbedPane != null ? tabbedPane.getTabCount() : 0];
+        Workspace[] result = new Workspace[tabbedPane.getComponentCount()];
         for (int i = 0; i < result.length; ++i) {
-            result[i] = (Workspace) tabbedPane.getComponentAt(i);
+            result[i] = (Workspace) tabbedPane.getComponent(i);
         }
         return result;
     }
@@ -378,7 +380,7 @@ public class Evergreen {
     
     /** Returns the workspace whose root directory shares the longest common prefix with the given filename. */
     public Workspace getBestWorkspaceForFilename(String filename) {
-        Workspace bestWorkspace = (Workspace) tabbedPane.getSelectedComponent();
+        Workspace bestWorkspace = getCurrentWorkspace();
         int bestLength = 0;
         for (Workspace workspace : getWorkspaces()) {
             String workspaceRoot = workspace.getRootDirectory();
@@ -394,53 +396,46 @@ public class Evergreen {
     }
     
     public Workspace getCurrentWorkspace() {
-        if (tabbedPane == null) {
-            return null;
-        }
-        return (Workspace) tabbedPane.getSelectedComponent();
+        return currentWorkspace;
     }
     
-    /**
-     * Finds the appropriate index in tabbedPane for a workspace with the given name.
-     * The idea is that sorting workspaces alphabetically will remove the urge to want
-     * manual control over workspace order. Alphabetical order is sensible enough that
-     * we shouldn't be upset by a workspace seeming to be in the wrong place, as was
-     * so easily the case with the previous implicit chronological order.
-     */
-    public int getWorkspaceIndexInTabbedPane(String name) {
-        int index = 0;
-        for (int i = 0; i < tabbedPane.getTabCount(); i++) {
-            String title = tabbedPane.getTitleAt(i);
-            if (name.compareToIgnoreCase(title) <= 0) {
-                break;
-            }
-            index++;
-        }
-        return index;
+    private void showWorkspace(final Workspace w) {
+        CardLayout cl = (CardLayout) tabbedPane.getLayout();
+        cl.show(tabbedPane, w.getTitle());
     }
     
     public void cycleWorkspaces(int indexDelta) {
-        int index = tabbedPane.getSelectedIndex();
-        if (index == -1) {
-            return;
+        CardLayout cl = (CardLayout) tabbedPane.getLayout();
+        if (indexDelta > 0) {
+            cl.next(tabbedPane);
+        } else if (indexDelta < 0) {
+            cl.previous(tabbedPane);
         }
-        int newIndex = (index + indexDelta) % tabbedPane.getTabCount();
-        if (newIndex == -1) {
-            newIndex = tabbedPane.getTabCount() - 1;
-        }
-        tabbedPane.setSelectedIndex(newIndex);
     }
     
     public void goToWorkspaceByIndex(int workspaceIndex) {
-        if (workspaceIndex >= 0 && workspaceIndex < tabbedPane.getTabCount()) {
-            tabbedPane.setSelectedIndex(workspaceIndex);
+        if (workspaceIndex >= 0 && workspaceIndex < tabbedPane.getComponentCount()) {
+            Workspace w = (Workspace) tabbedPane.getComponent(workspaceIndex);
+            showWorkspace(w);
         }
     }
     
-    private void addWorkspaceToTabbedPane(final Workspace workspace) {
-        String name = workspace.getTitle();
-        tabbedPane.insertTab(name, null, workspace, workspace.getRootDirectory(), getWorkspaceIndexInTabbedPane(name));
-        tabbedPane.setSelectedComponent(workspace);
+    private void addWorkspace(final Workspace workspace) {
+        workspace.addComponentListener(new ComponentAdapter() {
+            public void componentShown(ComponentEvent e) {
+                currentWorkspace = workspace;
+                menuBar.getWorkspaceMenu().setText("Project: " + workspace.getRootDirectory());
+                
+                EventQueue.invokeLater(new Runnable() {
+                    public void run() {
+                        workspace.openRememberedFiles();
+                    }
+                });
+            }
+        });
+        
+        tabbedPane.add(workspace, workspace.getTitle());
+        showWorkspace(workspace);
         fireTabbedPaneTabCountChange();
         
         // We need to ensure that the workspace has been validated so that it
@@ -450,7 +445,8 @@ public class Evergreen {
         workspace.revalidate();
         frame.validate();
         
-        showStatus("Added workspace \"" + name + "\" (" + workspace.getRootDirectory() + ")");
+        showStatus("Added workspace \"" + workspace.getTitle() + "\" (" +
+                   workspace.getRootDirectory() + ")");
     }
 
     public Workspace createWorkspace(WorkspaceProperties properties) {
@@ -461,7 +457,7 @@ public class Evergreen {
         }
         Workspace workspace = new Workspace(properties.name, properties.rootDirectory);
         workspace.setBuildTarget(properties.buildTarget);
-        addWorkspaceToTabbedPane(workspace);
+        addWorkspace(workspace);
         moveFilesToBestWorkspaces();
         return workspace;
     }
@@ -574,7 +570,7 @@ public class Evergreen {
             if (dirtyWorkspaces.size() == 1) {
                 // Ensure that the workspace in question is visible.
                 Workspace firstDirtyWorkspace = dirtyWorkspaces.get(0);
-                tabbedPane.setSelectedComponent(firstDirtyWorkspace);
+                showWorkspace(firstDirtyWorkspace);
                 // Ensure that at least the first dirty window is maximally visible.
                 ETextWindow firstDirtyWindow = firstDirtyWorkspace.getDirtyTextWindows()[0];
                 firstDirtyWindow.expand();
@@ -740,6 +736,9 @@ public class Evergreen {
         
         workspace.setInitialFiles(initialFiles);
         File rootDirectory = FileUtilities.fileFromString(workspace.getRootDirectory());
+
+        // FIXME: Need to report that the workspace/project doesn't exist.
+        /*
         int which = tabbedPane.indexOfComponent(workspace);
         if (rootDirectory.exists() == false) {
             tabbedPane.setForegroundAt(which, Color.RED);
@@ -748,6 +747,8 @@ public class Evergreen {
             tabbedPane.setForegroundAt(which, Color.RED);
             tabbedPane.setToolTipTextAt(which, properties.rootDirectory + " isn't a directory.");
         }
+        */
+
         return workspace;
     }
     
@@ -761,7 +762,7 @@ public class Evergreen {
     }
     
     public void initWindow() {
-        frame = new JFrame("JuJitsu");
+        frame = new JFrame("Jujitsu");
         initWindowIcon();
         initWindowListener();
     }
@@ -804,7 +805,7 @@ public class Evergreen {
     
     private void initAboutBox() {
         AboutBox aboutBox = AboutBox.getSharedInstance();
-        aboutBox.setWebSiteAddress("http://beatniksoftware.com/jujitsu/");
+        aboutBox.setWebSiteAddress("http://beatniksoftware.com/jujitsu");
         aboutBox.addCopyright("Copyright (C) 2004-2007 Free Software Foundation, Inc.");
         aboutBox.addCopyright("All Rights Reserved.");
     }
@@ -814,23 +815,7 @@ public class Evergreen {
             startSignal.await();
         } catch (InterruptedException ex) {
         }
-    }
-    
-    private void initRememberedFilesOpener() {
-        ChangeListener initialFileOpener = new ChangeListener() {
-            public void stateChanged(final ChangeEvent e) {
-                EventQueue.invokeLater(new Runnable() {
-                    public void run() {
-                        getCurrentWorkspace().openRememberedFiles();
-                    }
-                });
-            }
-        };
-        tabbedPane.addChangeListener(initialFileOpener);
-        // Bring the listener up to speed with the current situation.
-        // We couldn't add the listener in advance, because we want the tabbed pane on the display before we start listening.
-        initialFileOpener.stateChanged(null);
-    }
+    }    
     
     private void init() {
         final long t0 = System.nanoTime();
@@ -847,7 +832,9 @@ public class Evergreen {
         sidebar.addDefaultPanel(tagsPanel);
         sidebar.showPanel(tagsPanel);
 
-        tabbedPane = new EvergreenTabbedPane();
+        tabbedPane = new JPanel();
+        tabbedPane.setLayout(new CardLayout());
+
         splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, true, tabbedPane, sidebar);
         initStatusArea();
         readSavedState();
@@ -857,7 +844,9 @@ public class Evergreen {
         
         frame.getContentPane().add(splitPane, BorderLayout.CENTER);
         frame.getContentPane().add(statusArea, BorderLayout.SOUTH);
-        frame.setJMenuBar(new EvergreenMenuBar());
+        
+        menuBar = new EvergreenMenuBar();
+        frame.setJMenuBar(menuBar);
         
         initialState.openRememberedWorkspaces();
         
@@ -871,11 +860,9 @@ public class Evergreen {
         
         EventQueue.invokeLater(new Runnable() {
             public void run() {
-                if (tabbedPane.getTabCount() == 0) {
+                if (getWorkspaces().length == 0) {
                     // If we didn't create any workspaces, give the user some help...
-                    showAlert("Welcome to Evergreen!", "This looks like the first time you've used Evergreen. You'll need to create workspaces corresponding to the projects you wish to work on.<p>Choose \"Add Workspace...\" from the the \"Workspace\" menu.<p>You can create as many workspaces as you like, but you'll need at least one to be able to do anything.");
-                } else {
-                    initRememberedFilesOpener();
+                    showAlert("Welcome to Jujitsu!", "This looks like the first time you've used Jujitsu. You'll need to tell Jujitsu about the projects you wish to work on.<p>Choose \"Add Project...\" from the the \"Project\" menu.<p>");
                 }
                 
                 Thread fileListUpdaterStarterThread = new Thread(new Runnable() {

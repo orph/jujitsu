@@ -6,5 +6,5 @@ fixedFont.default=true
 hungryDelete=false
 indent.string=    
 
-files.uninterestingExtensions=.a;.aux;.bak;.bin;.class;.d;.elf;.exe;.jar;.lib;.log;.map;.o;.obj;.orig;.swp;.texshop;.toc
+files.uninterestingExtensions=.a;.aux;.bak;.bin;.class;.d;.elf;.exe;.jar;.lib;.log;.map;.o;.obj;.orig;.swp;.texshop;.toc;.flc
 files.externalApplicationExtensions=.icns;.jpeg;.jpg;.mov;.mp3;.mpeg;.mpg;.pdf;.png;.tiff

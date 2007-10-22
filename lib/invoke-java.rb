@@ -123,7 +123,7 @@ class Java
     init_default_class_path()
     # We don't know the JVM's architecture at this point.
     # We've seen a number of systems which run an i386 JVM on an amd64 kernel.
-    add_pathnames_property("org.jessies.libraryDirectories", Dir.glob("#{@project_root}/.generated/*_#{target_os()}/lib"))
+    add_pathnames_property("com.beatniksoftware.libraryDirectories", Dir.glob("#{@project_root}/.generated/*_#{target_os()}/lib"))
     
     set_icons(name)
     
@@ -388,9 +388,9 @@ class Java
       add_property("apple.laf.useScreenMenuBar", "true")
     end
     
-    add_pathname_property("org.jessies.aboutBoxIcon", @png_icon)
-    add_pathname_property("org.jessies.frameIcon", @frame_icon)
-    add_pathname_property("org.jessies.projectRoot", @project_root)
+    add_pathname_property("com.beatniksoftware.aboutBoxIcon", @png_icon)
+    add_pathname_property("com.beatniksoftware.frameIcon", @frame_icon)
+    add_pathname_property("com.beatniksoftware.projectRoot", @project_root)
     
     # Work around Sun bug 6274341.
     add_property("java.awt.Window.locationByPlatform", "true")

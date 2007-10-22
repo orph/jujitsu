@@ -379,7 +379,7 @@ public class FileUtilities {
 
     public static void loadNativeLibrary(String libraryName) {
         String fileName = System.mapLibraryName(libraryName);
-        String directories = System.getProperty("org.jessies.libraryDirectories");
+        String directories = System.getProperty("com.beatniksoftware.libraryDirectories");
         for (String directory : directories.split(File.pathSeparator)) {
             File candidatePath = new File(directory, fileName);
             try {

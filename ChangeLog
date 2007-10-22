@@ -1,3 +1,16 @@
+2007-10-21  Alex Graveley  <alex@beatniksoftware.com>
+
+	* src/e/gui/AboutBox.java: Use 128px icon.
+
+	* lib/invoke-java.rb: org.jessies -> com.beatniksoftware.
+	* src/e/gui/JFrameUtilities.java: Ditto.
+	* src/e/util/FileUtilities.java: Ditto.
+
+	* lib/data/edit.properties-sample (hungryDelete): Add .flc to ignored
+	extensions.
+
+	* lib/jujitsu*png: Update to new icon.
+	
 2007-10-20  Alex Graveley  <alex@beatniksoftware.com>
 
 	* src/e/gui/AboutBox.java: Fix post-merge startup crash, wherein

@@ -13,7 +13,7 @@ public class JFrameUtilities {
     static {
         // Load the icon carefully so that failures don't jeopardize users of this class.
         // You don't want to hang in <clinit>!
-        String filename = System.getProperty("org.jessies.frameIcon");
+        String filename = System.getProperty("com.beatniksoftware.frameIcon");
         Image image = null;
         try {
             // Load the icon if it looks like a real attempt was made to specify one.

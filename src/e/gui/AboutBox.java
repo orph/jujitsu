@@ -60,7 +60,7 @@ public class AboutBox {
     public void setImage(String filename) {
         try {
             // Apple's HIG says scale to 64x64. I'm not sure there's any advice for the other platforms.
-            this.icon = new ImageIcon(ImageUtilities.scale(ImageIO.read(FileUtilities.fileFromString(filename)), 64, 64, ImageUtilities.InterpolationHint.BICUBIC));
+            this.icon = new ImageIcon(ImageUtilities.scale(ImageIO.read(FileUtilities.fileFromString(filename)), 128, 128, ImageUtilities.InterpolationHint.BICUBIC));
             
             if (GuiUtilities.isMacOs()) {
                 // Apple's HIG says that these dialog icons should be the application icon.
@@ -270,7 +270,7 @@ public class AboutBox {
             return;
         }
         
-        String aboutBoxIconFilename = System.getProperty("org.jessies.aboutBoxIcon");
+        String aboutBoxIconFilename = System.getProperty("com.beatniksoftware.aboutBoxIcon");
         if (aboutBoxIconFilename != null) {
             setImage(aboutBoxIconFilename);
         }

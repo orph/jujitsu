@@ -41,16 +41,33 @@ public class WorkspaceProperties {
             String pathname = filenameChooserField.getPathname();
             // Protect Windows users against accidental use of '/', which will probably mostly work, but is likely to lead to confusion.
             pathname = pathname.replace('/', File.separatorChar).replace('\\', File.separatorChar);
-            
-            String message = FileUtilities.checkDirectoryExistence(pathname);
-            if (message == null) {
+            if (checkPathnameIsDirectory(pathname)) {
                 name = nameField.getText();
+                if (name.trim().length() == 0) {
+                    // Default the visible workspace name to the leafname of the workspace root.
+                    name = FileUtilities.fileFromString(pathname).getName();
+                }
                 rootDirectory = pathname;
                 buildTarget = buildTargetField.getText();
                 return true;
             }
-            Evergreen.getInstance().showAlert(message, "The pathname you supply must exist, and must be a directory.");
         }
         return false;
+    }
+    
+    private boolean checkPathnameIsDirectory(String pathname) {
+        File proposedDirectory = FileUtilities.fileFromString(pathname);
+        if (proposedDirectory.exists() == false) {
+            boolean createDirectory = Evergreen.getInstance().askQuestion("Create directory?", "The directory \"" + proposedDirectory + "\" doesn't exist.", "Create");
+            if (createDirectory == false) {
+                return false;
+            }
+            proposedDirectory.mkdirs();
+            return true;
+        } else if (proposedDirectory.isDirectory() == false) {
+            Evergreen.getInstance().showAlert("Not a directory", "The path \"" + pathname + "\" exists but is not a directory.");
+            return false;
+        }
+        return true;
     }
 }

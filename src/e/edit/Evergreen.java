@@ -494,7 +494,8 @@ public class Evergreen {
             showAlert("Couldn't remove workspace", "The last workspace cannot be removed.");
             return;
         }
-        String question = "Do you really want to remove the workspace \"" + workspace.getTitle() + "\"?";
+        String question = "Remove the workspace \"" + workspace.getTitle() + "\"?";
+        question += " Workspace files will not be modified or deleted.";
         if (workspace.isEmpty() == false) {
             question += " Open windows will be moved to the next best workspace.";
         }

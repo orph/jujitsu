@@ -82,9 +82,9 @@ public class PMakefileTextStyler extends PAbstractLanguageStyler {
     public void initStyleApplicators() {
         // Make functions are -- except in special cases like when they're arguments to "call" -- always preceded by "$(" or "${".
         // I didn't realize until testing this (and I've checked the source to see I'm not imagining things) that you can't have whitespace between the "$(" and the keyword.
-        textArea.addStyleApplicator(new KeywordStyleApplicator(textArea, new HashSet<String>(Arrays.asList(FUNCTIONS)), "\\b(?<=\\$[({])([a-z_-]+)\\b"));
+        textArea.addStyleApplicator(new KeywordStyleApplicator(textArea, new HashSet<String>(Arrays.asList(FUNCTIONS)), "\\b(?<=\\$[({])([a-z_-]+)\\b", PStyle.KEYWORD));
         // Make directives are just plain old words.
-        textArea.addStyleApplicator(new KeywordStyleApplicator(textArea, new HashSet<String>(Arrays.asList(DIRECTIVES)), "\\b(\\w+)\\b"));
+        textArea.addStyleApplicator(new KeywordStyleApplicator(textArea, new HashSet<String>(Arrays.asList(DIRECTIVES)), "\\b(\\w+)\\b", PStyle.KEYWORD));
         // There are also various automatic variables.
         textArea.addStyleApplicator(new RegularExpressionStyleApplicator(textArea, "(\\$[@%<?^+*]|\\$\\([@%<?^+*][DF]\\))", PStyle.KEYWORD));
         // And finally, special built-in target names.

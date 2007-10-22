@@ -4,13 +4,16 @@ import java.util.*;
 import java.util.regex.*;
 
 /**
- * Recognizes keywords within NORMAL text segments and styles them KEYWORD.
+ * Recognizes keywords within NORMAL text segments and styles them.
  */
 public class KeywordStyleApplicator extends RegularExpressionStyleApplicator {
     private Set<String> keywords;
-    
-    public KeywordStyleApplicator(PTextArea textArea, Set<String> keywords, String keywordRegularExpression) {
-        super(textArea, keywordRegularExpression, PStyle.KEYWORD);
+        
+    public KeywordStyleApplicator(PTextArea textArea,
+                                  Set<String> keywords,
+                                  String keywordRegularExpression,
+                                  PStyle style) {
+        super(textArea, keywordRegularExpression, style);
         this.keywords = keywords;
     }
     

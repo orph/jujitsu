@@ -10,7 +10,7 @@ public class CycleWorkspacesAction extends ETextAction {
     private int indexDelta;
     
     public CycleWorkspacesAction(int indexDelta) {
-        super((indexDelta == 1) ? "Next Workspace" : "Previous Workspace");
+        super((indexDelta == 1) ? "Next Project" : "Previous Project");
         this.indexDelta = indexDelta;
         initKeyboardEquivalent();
     }

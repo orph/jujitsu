@@ -214,12 +214,17 @@ public class EvergreenMenuBar extends EMenuBar {
         JMenu menu = new JMenu("Project");
         menu.setMnemonic('P');
 
+        JMenuItem item = new JMenuItem("(No Projects)");
+        item.setEnabled(false);
+        menu.add(item);
+        menu.add(new JSeparator());
         menu.add(new BuildAction());
         menu.add(new RescanWorkspaceAction());
         menu.add(new JSeparator());
-        menu.add(new AddWorkspaceAction());
+        // FIXME: Remove this.
+        //menu.add(new AddWorkspaceAction());
         menu.add(new EditWorkspaceAction());
-        menu.add(new RemoveWorkspaceAction());
+        menu.add(new CloseWorkspaceAction());
         menu.add(new JSeparator());
         menu.add(new CycleWorkspacesAction(1));
         menu.add(new CycleWorkspacesAction(-1));

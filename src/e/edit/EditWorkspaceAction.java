@@ -1,5 +1,6 @@
 package e.edit;
 
+import e.gui.*;
 import java.awt.event.*;
 import javax.swing.*;
 
@@ -11,7 +12,8 @@ public class EditWorkspaceAction extends AbstractAction {
     
     // Edit the given workspace.
     public EditWorkspaceAction(Workspace workspace) {
-        super("Edit Workspace...");
+        super("Project Settings...");
+        GnomeStockIcon.useStockIcon(this, "gtk-preferences");
         this.boundWorkspace = workspace;
     }
     
@@ -28,7 +30,7 @@ public class EditWorkspaceAction extends AbstractAction {
         properties.rootDirectory = workspace.getRootDirectory();
         properties.buildTarget = workspace.getBuildTarget();
         
-        if (properties.showWorkspacePropertiesDialog("Workspace Properties", "Apply") == true) {
+        if (properties.showWorkspacePropertiesDialog("Project Settings", "Apply") == true) {
             workspace.setTitle(properties.name);
             workspace.setRootDirectory(properties.rootDirectory);
             workspace.setBuildTarget(properties.buildTarget);

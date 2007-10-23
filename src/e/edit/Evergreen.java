@@ -399,7 +399,7 @@ public class Evergreen {
         return currentWorkspace;
     }
     
-    private void showWorkspace(final Workspace w) {
+    public void showWorkspace(final Workspace w) {
         CardLayout cl = (CardLayout) tabbedPane.getLayout();
         cl.show(tabbedPane, w.getTitle());
     }
@@ -436,7 +436,7 @@ public class Evergreen {
         
         tabbedPane.add(workspace, workspace.getTitle());
         showWorkspace(workspace);
-        fireTabbedPaneTabCountChange();
+        fireWorkspacesChange();
         
         // We need to ensure that the workspace has been validated so that it
         // and its children have bounds, so that EColumn has a non-zero height
@@ -473,7 +473,7 @@ public class Evergreen {
                     return false;
                 }
                 tabbedPane.remove(workspace);
-                fireTabbedPaneTabCountChange();
+                fireWorkspacesChange();
             }
         }
         return true;
@@ -486,26 +486,23 @@ public class Evergreen {
     }
     
     public void removeWorkspace(Workspace workspace) {
-        if (workspace == null) {
-            showAlert("Couldn't remove workspace", "There's no workspace selected.");
-            return;
-        }
+        assert workspace != null;
+        
         if (getWorkspaces().length == 1) {
             showAlert("Couldn't remove workspace", "The last workspace cannot be removed.");
             return;
         }
-        String question = "Remove the workspace \"" + workspace.getTitle() + "\"?";
-        question += " Workspace files will not be modified or deleted.";
+        String question = "Close the project \"" + workspace.getTitle() + "\"?";
         if (workspace.isEmpty() == false) {
             question += " Open windows will be moved to the next best workspace.";
         }
-        boolean remove = askQuestion("Remove workspace?", question, "Remove");
+        boolean remove = askQuestion("Close Project?", question, "Close");
         if (remove == false) {
             return;
         }
         
         tabbedPane.remove(workspace);
-        fireTabbedPaneTabCountChange();
+        fireWorkspacesChange();
         workspace.moveFilesToBestWorkspaces();
         workspace.dispose();
     }
@@ -516,13 +513,34 @@ public class Evergreen {
      * should invoke this method. Annoyingly, JTabbedPane doesn't make such
      * changes observable, so it's down to us to be careful.
      */
-    private void fireTabbedPaneTabCountChange() {
-        Thread thread = new Thread(new Runnable() {
+    private void fireWorkspacesChange() {
+        JMenu menu = menuBar.getWorkspaceMenu();
+
+        // Clear workspaces up to the first separator
+        while (menu.getItem(0) instanceof JMenuItem) {
+            menu.remove(0);
+        }
+
+        int wsCount = 0;
+        for (Workspace ws : getWorkspaces()) {
+            JMenuItem item = new JMenuItem(new OpenWorkspaceAction(ws));
+            menu.insert(item, 0);
+            wsCount++;
+        }
+        for (int idx = 0; idx < Math.min(10, wsCount); idx++) {
+           JMenuItem item = menu.getItem(idx);
+           if (item != null) {
+              String wsAccel = Integer.toString(idx+1);
+              item.setText(wsAccel + ". " + item.getText());
+              item.setMnemonic(wsAccel.charAt(0));
+           }
+        }
+
+        new Thread(new Runnable() {
             public void run() {
                 rememberState();
             }
-        });
-        thread.start();
+        }).start();
     }
     
     public void createWorkspaceForCurrentDirectory() {

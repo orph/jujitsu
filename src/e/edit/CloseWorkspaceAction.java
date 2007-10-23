@@ -1,19 +1,21 @@
 package e.edit;
 
+import e.gui.*;
 import java.awt.event.*;
 import javax.swing.*;
 
-public class RemoveWorkspaceAction extends AbstractAction {
+public class CloseWorkspaceAction extends AbstractAction {
     private Workspace boundWorkspace;
     
     // Remove the given workspace.
-    public RemoveWorkspaceAction(Workspace workspace) {
-        super("Remove Workspace");
+    public CloseWorkspaceAction(Workspace workspace) {
+        super("Close Project");
+        GnomeStockIcon.useStockIcon(this, "gtk-close");
         this.boundWorkspace = workspace;
     }
     
     // Remove the current workspace at the time the action is performed.
-    public RemoveWorkspaceAction() {
+    public CloseWorkspaceAction() {
         this(null);
     }
     

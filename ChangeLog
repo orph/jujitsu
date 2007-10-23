@@ -1,3 +1,14 @@
+2007-10-23  Alex Graveley  <alex@beatniksoftware.com>
+
+	Workspace -> Project in user-visible strings.
+
+	* src/e/edit/Evergreen.java: Load the Projects menu with
+	OpenWorkspaceActions for each workspace.  The first 9 get numeral
+	mnemonics.
+
+	* lib/data/edit.properties: Rename from edit.properties-sample.
+	* bin/jujitsu: Just copy edit.properties.
+
 2007-10-21  Alex Graveley  <alex@beatniksoftware.com>
 
 	* src/e/edit/EvergreenMenuBar.java: Add right-aligned Project

@@ -12,34 +12,37 @@ public class PCTextStyler extends PAbstractLanguageStyler {
         "auto",
         "break",
         "case",
-        "char",
         "const",
         "continue",
         "default",
         "do",
-        "double",
         "else",
         "enum",
         "extern",
-        "float",
         "for",
         "goto",
         "if",
-        "int",
-        "long",
         "register",
         "return",
-        "short",
-        "signed",
         "static",
         "struct",
         "switch",
         "typedef",
         "union",
-        "unsigned",
         "void",
         "volatile",
         "while"
+    };
+    
+    private static final String[] TYPES = new String[] {
+        "char",
+        "double",
+        "float",
+        "int",
+        "long",
+        "short",
+        "signed",
+        "unsigned",        
     };
     
     public PCTextStyler(PTextArea textArea) {
@@ -58,5 +61,9 @@ public class PCTextStyler extends PAbstractLanguageStyler {
     
     public void addKeywordsTo(Collection<String> collection) {
         collection.addAll(Arrays.asList(KEYWORDS));
+    }
+    
+    public void addTypesTo(Collection<String> collection) {
+        collection.addAll(Arrays.asList(TYPES));
     }
 }

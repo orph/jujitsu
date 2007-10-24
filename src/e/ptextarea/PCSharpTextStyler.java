@@ -8,21 +8,16 @@ public class PCSharpTextStyler extends PAbstractLanguageStyler {
         "abstract",
         "as",
         "base",
-        "bool",
         "break",
-        "byte",
         "case",
         "catch",
-        "char",
         "checked",
         "class",
         "const",
         "continue",
-        "decimal",
         "default",
         "delegate",
         "do",
-        "double",
         "else",
         "enum",
         "event",
@@ -31,19 +26,16 @@ public class PCSharpTextStyler extends PAbstractLanguageStyler {
         "false",
         "finally",
         "fixed",
-        "float",
         "for",
         "foreach",
         "goto",
         "if",
         "implicit",
         "in",
-        "int",
         "interface",
         "internal",
         "is",
         "lock",
-        "long",
         "namespace",
         "new",
         "null",
@@ -58,13 +50,10 @@ public class PCSharpTextStyler extends PAbstractLanguageStyler {
         "readonly",
         "ref",
         "return",
-        "sbyte",
         "sealed",
-        "short",
         "sizeof",
         "stackalloc",
         "static",
-        "string",
         "struct",
         "switch",
         "this",
@@ -72,11 +61,8 @@ public class PCSharpTextStyler extends PAbstractLanguageStyler {
         "true",
         "try",
         "typeof",
-        "uint",
-        "ulong",
         "unchecked",
         "unsafe",
-        "ushort",
         "using",
         "virtual",
         "void",
@@ -96,6 +82,23 @@ public class PCSharpTextStyler extends PAbstractLanguageStyler {
         "yield",
     };
     
+    private static final String[] TYPES = new String[] {
+        "bool",
+        "byte",
+        "char",
+        "decimal",
+        "double",
+        "float",
+        "int",
+        "long",
+        "sbyte",
+        "short",
+        "string",
+        "uint",
+        "ulong",
+        "ushort",        
+    };
+    
     public PCSharpTextStyler(PTextArea textArea) {
         super(textArea);
     }
@@ -112,5 +115,9 @@ public class PCSharpTextStyler extends PAbstractLanguageStyler {
     
     public void addKeywordsTo(Collection<String> collection) {
         collection.addAll(Arrays.asList(KEYWORDS));
+    }
+    
+    public void addTypesTo(Collection<String> collection) {
+        collection.addAll(Arrays.asList(TYPES));
     }
 }

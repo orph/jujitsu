@@ -1,3 +1,9 @@
+2007-10-24  Alex Graveley  <alex@beatniksoftware.com>
+
+	* src/e/ptextarea/PCSharpTextStyler.java: Split out basic types,
+	returned in addTypesTo.
+	* src/e/ptextarea/PCTextStyler.java: Ditto.
+
 2007-10-23  Alex Graveley  <alex@beatniksoftware.com>
 
 	Workspace -> Project in user-visible strings.

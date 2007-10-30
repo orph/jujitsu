@@ -389,7 +389,9 @@ class Java
     end
     
     add_pathname_property("com.beatniksoftware.aboutBoxIcon", @png_icon)
-    add_pathname_property("com.beatniksoftware.frameIcon", @frame_icon)
+    if @frame_icon != ""
+      add_pathname_property("com.beatniksoftware.frameIcon", @frame_icon)
+    end
     add_pathname_property("com.beatniksoftware.projectRoot", @project_root)
     
     # Work around Sun bug 6274341.

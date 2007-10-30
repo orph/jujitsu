@@ -27,8 +27,9 @@ public class ComponentUtilities {
     }
     
     /**
-     * Fixes the page up/down to work on another component from the one with the keyboard focus.
+     * Fixes the page up/down keys and home/end keys to work on another component from the one with the keyboard focus.
      * This lets you offer convenient keyboard navigation like in Apple's Mail, where the arrow keys move through the inbox while the page keys move through the selected message.
+     * Note that the home/end keys aren't redirected for text fields, on the assumption that they're needed for cursor movement.
      */
     public static void divertPageScrollingFromTo(final JComponent focusedComponent, final JComponent componentToPageScroll) {
         focusedComponent.getInputMap().put(KeyStroke.getKeyStroke("PAGE_UP"), "pagePatchUp");
@@ -43,6 +44,20 @@ public class ComponentUtilities {
                 ComponentUtilities.scroll(componentToPageScroll, true, 1);
             }
         });
+        if (focusedComponent instanceof JTextField == false) {
+            focusedComponent.getInputMap().put(KeyStroke.getKeyStroke("HOME"), "pagePatchToTop");
+            focusedComponent.getInputMap().put(KeyStroke.getKeyStroke("END"), "pagePatchToBottom");
+            focusedComponent.getActionMap().put("pagePatchToTop", new AbstractAction() {
+                public void actionPerformed(ActionEvent e) {
+                    ComponentUtilities.scrollToExtremity(componentToPageScroll, true);
+                }
+            });
+            focusedComponent.getActionMap().put("pagePatchToBottom", new AbstractAction() {
+                public void actionPerformed(ActionEvent e) {
+                    ComponentUtilities.scrollToExtremity(componentToPageScroll, false);
+                }
+            });
+        }
     }
     
     /**
@@ -57,6 +72,15 @@ public class ComponentUtilities {
         newValue = Math.min(newValue, scrollBar.getMaximum());
         newValue = Math.max(newValue, scrollBar.getMinimum());
         scrollBar.setValue(newValue);
+    }
+    
+    /**
+     * Scrolls the given component to its top or bottom.
+     * Useful for implementing behavior like in Apple's Mail where home/end in the list cause scrolling in the text.
+     */
+    public static void scrollToExtremity(JComponent c, boolean top) {
+        JScrollBar scrollBar = ((JScrollPane) SwingUtilities.getAncestorOfClass(JScrollPane.class, c)).getVerticalScrollBar();
+        scrollBar.setValue(top ? scrollBar.getMinimum() : scrollBar.getMaximum());
     }
     
     /**

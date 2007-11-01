@@ -81,10 +81,8 @@ public class ShellCommand {
         
         capturedOutput = new StringBuilder();
         
-        startMonitoringStream(process.getInputStream());
-        startMonitoringStream(process.getErrorStream());
-        
-        workspace.getErrorsPanel().resetAutoScroll();
+        startMonitoringStream(process.getInputStream(), false);
+        startMonitoringStream(process.getErrorStream(), true);
     }
     
     private void pumpStandardInput() {
@@ -100,12 +98,12 @@ public class ShellCommand {
             }
         } catch (Exception ex) {
             Log.warn("Problem pumping standard input for task \"" + command + "\"", ex);
-            workspace.getErrorsPanel().append(new String[] { "Problem pumping standard input for task \"" + command + "\": " + ex.getMessage() + "." });
+            workspace.getErrorsPanel().appendLines(true, new String[] { "Problem pumping standard input for task \"" + command + "\": " + ex.getMessage() + "." });
         } finally {
             try {
                 os.close();
             } catch (IOException ex) {
-                workspace.getErrorsPanel().append(new String[] { "Couldn't close standard input for task \"" + command + "\": " + ex.getMessage() + "." });
+                workspace.getErrorsPanel().appendLines(true, new String[] { "Couldn't close standard input for task \"" + command + "\": " + ex.getMessage() + "." });
             }
         }
     }
@@ -128,17 +126,17 @@ public class ShellCommand {
         return result;
     }
     
-    public void startMonitoringStream(InputStream stream) throws IOException {
+    public void startMonitoringStream(InputStream stream, boolean isStdErr) throws IOException {
         InputStreamReader inputStreamReader = new InputStreamReader(stream, "UTF-8");
         BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-        StreamMonitor streamMonitor = new StreamMonitor(bufferedReader, this);
+        StreamMonitor streamMonitor = new StreamMonitor(bufferedReader, this, isStdErr);
         streamMonitor.execute();
     }
     
     /**
      * Invoked by StreamMonitor.process, on the EDT.
      */
-    public void process(String... lines) {
+    public void process(boolean isStdErr, String... lines) {
         switch (outputDisposition) {
         case CREATE_NEW_DOCUMENT:
             Log.warn("CREATE_NEW_DOCUMENT not yet implemented.");
@@ -146,7 +144,7 @@ public class ShellCommand {
         case DISCARD:
             break;
         case ERRORS_WINDOW:
-            getWorkspace().getErrorsPanel().append(lines);
+            getWorkspace().getErrorsPanel().appendLines(isStdErr, lines);
             break;
         case CLIPBOARD:
         case DIALOG:
@@ -197,7 +195,7 @@ public class ShellCommand {
         
         // A non-zero exit status is always potentially interesting.
         if (exitStatus != 0) {
-            workspace.getErrorsPanel().append(new String[] { "Task \"" + command + "\" failed with exit status " + exitStatus });
+            workspace.getErrorsPanel().appendLines(true, new String[] { "Task \"" + command + "\" failed with exit status " + exitStatus });
         }
         workspace.getErrorsPanel().taskDidExit(exitStatus);
     }

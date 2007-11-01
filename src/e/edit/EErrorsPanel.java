@@ -7,6 +7,7 @@ import java.util.*;
 import java.util.List;
 import java.util.regex.*;
 import javax.swing.*;
+import javax.swing.event.*;
 import e.ptextarea.*;
 import e.gui.*;
 import e.util.*;
@@ -36,42 +37,45 @@ public class EErrorsPanel extends JPanel {
     private static final Pattern JAVA_STACK_TRACE_PATTERN = Pattern.compile("([\\.\\w]+)(?:(?:\\$\\w+)*?\\.)[\\w\\$<>]+\\(\\w+\\.java(:\\d+)");
     
     private static final KillErrorsAction KILL_ERRORS_ACTION = new KillErrorsAction();
-
+    
     private final Workspace workspace;
     private JButton killButton;
     private PTextArea textArea;
+    private JScrollPane scrollPane;
     private EStatusBar statusBar;
     private int currentBuildErrorCount;
     private Process process;
     
+    private boolean shouldAutoScroll;
+    private ChangeListener autoScroller;
+    
     public EErrorsPanel(Workspace workspace) {
         super(new BorderLayout());
         setName("Build Output");
-        
         this.workspace = workspace;
-
         initKillButton();
         initTextArea();
         initStatusBar();
+        this.scrollPane = new JScrollPane(textArea, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
         
-        JScrollPane scrollPane = new JScrollPane(textArea, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-        GuiUtilities.keepMaximumShowing(scrollPane.getVerticalScrollBar());
-
         JPanel bottomLine = new JPanel(new BorderLayout(4, 0));
         bottomLine.add(killButton, BorderLayout.WEST);
         bottomLine.add(statusBar, BorderLayout.CENTER);
-
+        
         add(scrollPane, BorderLayout.CENTER);
         add(bottomLine, BorderLayout.SOUTH);
+        initKeyboardEquivalents();
+        
+        enableAutoScroll();
     }
-
+    
     private void initKeyboardEquivalents() {
         final String KILL_ERRORS_ACTION_NAME = "e.edit.KillErrorsAction";
         getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0, false), KILL_ERRORS_ACTION_NAME);
         getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put((KeyStroke) KILL_ERRORS_ACTION.getValue(Action.ACCELERATOR_KEY), KILL_ERRORS_ACTION_NAME);
         getRootPane().getActionMap().put(KILL_ERRORS_ACTION_NAME, KILL_ERRORS_ACTION);
     }
-     
+    
     private void initKillButton() {
         killButton = StopIcon.makeStopButton();
         killButton.addActionListener(new ActionListener() {
@@ -90,7 +94,6 @@ public class EErrorsPanel extends JPanel {
         textArea.addStyleApplicator(new ErrorLinkStyler(textArea));
         textArea.setWrapStyleWord(true);
         initTextAreaPopupMenu();
-        initKeyboardEquivalents();
     }
     
     private void initStatusBar() {
@@ -236,9 +239,11 @@ public class EErrorsPanel extends JPanel {
     }
     
     private class AppendRunnable implements Runnable {
+        private boolean isStdErr;
         private String text;
         
-        public AppendRunnable(String[] lines) {
+        public AppendRunnable(boolean isStdErr, String[] lines) {
+            this.isStdErr = isStdErr;
             this.text = StringUtilities.join(lines, "\n") + "\n";
         }
         
@@ -248,6 +253,9 @@ public class EErrorsPanel extends JPanel {
                 setVisible(true);
             }
             textArea.append(text);
+            if (isStdErr) {
+                disableAutoScroll();
+            }
         }
     }
     
@@ -255,17 +263,17 @@ public class EErrorsPanel extends JPanel {
         public void run() {
             textArea.setText("");
             textArea.getTextBuffer().getUndoBuffer().resetUndoBuffer();
-            resetAutoScroll();
+            enableAutoScroll();
         }
     }
-
+    
     private class HideRunnable implements Runnable {
         public void run() {
             setVisible(false);
         }
     }
     
-    public void append(String[] lines) {
+    public void appendLines(boolean isStdErr, String[] lines) {
         for (String line : lines) {
             // FIXME: this is a bit weak, and no longer necessary for our builds. The FIXME in this file about treating stderr specially might be a better way forward if we want to keep a hack.
             if (line.contains("***") || line.contains("warning:")) {
@@ -275,17 +283,27 @@ public class EErrorsPanel extends JPanel {
 
         /* Should we show the error dialog now, or later? */
         workspace.showErrorsPanel();
-        EventQueue.invokeLater(new AppendRunnable(lines));
+        EventQueue.invokeLater(new AppendRunnable(isStdErr, lines));
     }
     
-    public void clear() {
+    public void clearErrors() {
         EventQueue.invokeLater(new ClearRunnable());
         EventQueue.invokeLater(new HideRunnable());
     }
     
-    public void resetAutoScroll() {
-        // FIXME: differentiate between stdout and stderr, and pause scrolling as soon as we see anything on stderr.
-        //linkFormatter.setAutoScroll(true);
+    public synchronized void enableAutoScroll() {
+        if (shouldAutoScroll == false) {
+            this.shouldAutoScroll = true;
+            this.autoScroller = GuiUtilities.keepMaximumShowing(scrollPane.getVerticalScrollBar());
+        }
+    }
+    
+    public synchronized void disableAutoScroll() {
+        if (shouldAutoScroll == true) {
+            this.shouldAutoScroll = false;
+            GuiUtilities.stopMaximumShowing(scrollPane.getVerticalScrollBar(), autoScroller);
+            this.autoScroller = null;
+        }
     }
     
     public void initTextAreaPopupMenu() {

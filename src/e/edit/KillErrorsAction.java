@@ -14,6 +14,6 @@ public class KillErrorsAction extends AbstractAction {
         if (workspace == null) {
             return;
         }
-        workspace.getErrorsPanel().clear();
+        workspace.getErrorsPanel().clearErrors();
     }
 }

@@ -1,3 +1,13 @@
+2007-11-01  Alex Graveley  <alex@beatniksoftware.com>
+
+	Switch to swing-worker-1.1.jar from swing-worker.jar.
+	
+	* src/e/edit/ShellCommand.java (process): Update to take a List of
+	arguments, instead of '...'.
+	* src/e/edit/FindInFilesPanel.java: Ditto.
+	* src/e/edit/TagsUpdater.java: Ditto.
+	* src/e/edit/StreamMonitor.java: Ditto.
+
 2007-10-24  Alex Graveley  <alex@beatniksoftware.com>
 
 	* src/e/ptextarea/PCSharpTextStyler.java: Split out basic types,

@@ -247,7 +247,7 @@ public class FindInFilesPanel extends JPanel implements WorkspaceFileList.Listen
         }
         
         @Override
-        protected void process(DefaultMutableTreeNode... treeNodes) {
+        protected void process(java.util.List<DefaultMutableTreeNode> treeNodes) {
             if (currentSequenceNumber.get() != sequenceNumber) {
                 return;
             }

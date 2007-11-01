@@ -259,7 +259,7 @@ public class TagsUpdater {
         }
         
         @Override
-        protected void process(TagReader.Tag... tags) {
+        protected void process(java.util.List<TagReader.Tag> tags) {
             for (TagReader.Tag tag : tags) {
                 tag.toolTip = getTextArea().getLineText(tag.lineNumber - 1).trim();
                 

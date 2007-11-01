@@ -136,7 +136,7 @@ public class ShellCommand {
     /**
      * Invoked by StreamMonitor.process, on the EDT.
      */
-    public void process(boolean isStdErr, String... lines) {
+    public void process(boolean isStdErr, java.util.List<String> lines) {
         switch (outputDisposition) {
         case CREATE_NEW_DOCUMENT:
             Log.warn("CREATE_NEW_DOCUMENT not yet implemented.");
@@ -144,7 +144,7 @@ public class ShellCommand {
         case DISCARD:
             break;
         case ERRORS_WINDOW:
-            getWorkspace().getErrorsPanel().appendLines(isStdErr, lines);
+            getWorkspace().getErrorsPanel().appendLines(isStdErr, lines.toArray(new String[0]));
             break;
         case CLIPBOARD:
         case DIALOG:

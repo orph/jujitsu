@@ -5,13 +5,51 @@ import e.util.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.net.*;
+import java.util.*;
 import javax.swing.*;
 import javax.swing.event.*;
 import javax.swing.text.*;
 import javax.swing.text.html.*;
 
 public class AdvisorHtmlPane extends JComponent implements HyperlinkListener {
+    private interface Advice {
+        public void displayAdvice();
+    }
+    
+    private class TextAdvice implements Advice {
+        private String text;
+        
+        public TextAdvice(String text) {
+            this.text = text;
+        }
+        
+        //@Override // FIXME: Java 5's javac(1) is broken.
+        public void displayAdvice() {
+            setTemporaryText(text);
+        }
+    }
+    
+    public class UrlAdvice implements Advice {
+        private String url;
+        
+        public UrlAdvice(String url) {
+            this.url = url;
+        }
+        
+        //@Override // FIXME: Java 5's javac(1) is broken.
+        public void displayAdvice() {
+            try {
+                textPane.setPage(url);
+            } catch (Exception ex) {
+                Log.warn("Exception thrown in setPage.", ex);
+            }
+        }
+    }
+    
+    private final BackAction BACK_ACTION = new BackAction();
+    
     private JTextPane textPane;
+    private ArrayList<Advice> history = new ArrayList<Advice>();
     private EStatusBar statusBar;
     
     public AdvisorHtmlPane() {
@@ -29,7 +67,7 @@ public class AdvisorHtmlPane extends JComponent implements HyperlinkListener {
         textPane.setEditable(false);
         textPane.addHyperlinkListener(this);
         
-        initKeyBindings(textPane);
+        initKeyBindings();
         
         HTMLEditorKit editorKit = (HTMLEditorKit) textPane.getEditorKit();
         StyleSheet styleSheet = editorKit.getStyleSheet();
@@ -66,7 +104,7 @@ public class AdvisorHtmlPane extends JComponent implements HyperlinkListener {
         }
     }
     
-    private static void initKeyBindings(JTextPane textPane) {
+    private void initKeyBindings() {
         // Add C-F, C-D, and C-G.
         JTextComponentUtilities.addFindFunctionalityTo(textPane);
         
@@ -80,20 +118,91 @@ public class AdvisorHtmlPane extends JComponent implements HyperlinkListener {
         // Connect the up and down arrow keys to the scroll bar.
         ComponentUtilities.initKeyBinding(textPane, new ScrollAction(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0, false), textPane, false, 1));
         ComponentUtilities.initKeyBinding(textPane, new ScrollAction(KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0, false), textPane, false, -1));
+        
+        // Connect backspace to going back in the history.
+        ComponentUtilities.initKeyBinding(textPane, BACK_ACTION);
     }
     
-    public void setText(String text) {
-        textPane.setContentType("text/html");
-        textPane.setText(text);
-        textPane.setCaretPosition(0);
+    public JComponent makeToolBar() {
+        JButton backButton = new JButton(BACK_ACTION);
+        backButton.setFocusable(false);
+        backButton.setText(null);
+        
+        JToolBar toolBar = new JToolBar();
+        toolBar.setFloatable(false);
+        toolBar.add(backButton);
+        return toolBar;
+    }
+    
+    private static class BackIcon extends DrawnIcon {
+        private BackIcon() {
+            super(new Dimension(16, 16));
+        }
+        
+        public void paintIcon(Component c, Graphics oldGraphics, int x, int y) {
+            Graphics2D g = (Graphics2D) oldGraphics;
+            JButton button = (JButton) c;
+            g.setColor(button.isEnabled() ? Color.BLACK : Color.GRAY);
+            g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+            g.fillPolygon(new int[] { x+16, x+16, x+0 }, new int[] { y+0, y+16, y+8 }, 3);
+        }
+    }
+    
+    private class BackAction extends AbstractAction {
+        private BackAction() {
+            putValue(Action.NAME, "backAction");
+            putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_BACK_SPACE, 0, false));
+            // Our custom icon works fine for the Metal LAF, but not for the GTK+ LAF. I'm not currently able to test any others.
+            String gtkStockBackIconFilename = "/usr/share/icons/gnome/16x16/actions/back.png";
+            putValue(Action.SMALL_ICON, FileUtilities.exists(gtkStockBackIconFilename) ? new ImageIcon(gtkStockBackIconFilename) : new BackIcon());
+        }
+        
+        public void actionPerformed(ActionEvent e) {
+            goBack();
+        }
+        
+        private void goBack() {
+            if (history.size() < 2) {
+                return;
+            }
+            
+            history.remove(history.size() - 1);
+            Advice previousAdvice = history.get(history.size() - 1);
+            previousAdvice.displayAdvice();
+            
+            updateEnabledState();
+        }
+        
+        private void updateEnabledState() {
+            BACK_ACTION.setEnabled(history.size() >= 2);
+        }
+    };
+    
+    public void clearAdvice() {
+        textPane.setText("");
+        history.clear();
+        BACK_ACTION.updateEnabledState();
+    }
+    
+    public void setAdvice(Advice newAdvice) {
+        history.add(newAdvice);
+        BACK_ACTION.updateEnabledState();
+        newAdvice.displayAdvice();
     }
     
     public void setPage(String url) {
-        try {
-            textPane.setPage(url);
-        } catch (Exception ex) {
-            Log.warn("Exception thrown in setPage.", ex);
-        }
+        setAdvice(new UrlAdvice(url));
+    }
+    
+    public void setText(String text) {
+        setAdvice(new TextAdvice(text));
+    }
+    
+    public void setTemporaryText(String text) {
+        textPane.setContentType("text/html");
+        textPane.setText(text);
+        textPane.setCaretPosition(0);
     }
     
     /**

@@ -1,0 +1,3 @@
+glibc-doc (>= 2.3.2)
+rman (>= 3.2)
+stl-manual (>= 3.30)

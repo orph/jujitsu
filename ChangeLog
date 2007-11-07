@@ -1,3 +1,10 @@
+2007-11-06  Alex Graveley  <alex@beatniksoftware.com>
+
+	* lib/DEBIAN-control-Recommends.txt: Move recommended packages to
+	here from Depends.txt.
+
+	* package-for-distribution.rb: Add Recommends section to .deb.
+
 2007-11-01  Alex Graveley  <alex@beatniksoftware.com>
 
 	Switch to swing-worker-1.1.jar from swing-worker.jar.

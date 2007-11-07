@@ -196,14 +196,18 @@ copy_files_for_installation(".", project_resource_directory)
 # Generate a single JAR file containing both the project's unique classes and all the classes from the salma-hayek library.
 # We have to do this in two stages to avoid a "java.util.zip.ZipException: duplicate entry:" error from jar(1) for cases where both trees share a package prefix.
 
+# Windows users have java.exe on the path, but not jar.exe.
+require "#{salma_hayek}/lib/find-jdk-root.rb"
+jar = find_jdk_root() + "/bin/jar"
+
 # Use an absolute path so we can chdir first.
 jar_filename = Pathname.new("#{project_resource_directory}").realpath() + ".generated" + "classes.jar"
 # Using chdir rather than jar -C saves converting more pathnames to JVM-compatible format.
 Dir.chdir(".generated/classes/") {
-    spawnWithoutShell(["jar", "cf", convert_to_jvm_compatible_pathname(jar_filename), "."])
+    spawnWithoutShell([jar, "cf", convert_to_jvm_compatible_pathname(jar_filename), "."])
 }
 Dir.chdir("#{salma_hayek}/.generated/classes/") {
-    spawnWithoutShell(["jar", "uf", convert_to_jvm_compatible_pathname(jar_filename), "."])
+    spawnWithoutShell([jar, "uf", convert_to_jvm_compatible_pathname(jar_filename), "."])
 }
 
 if target_os() == "Darwin"
@@ -345,11 +349,17 @@ if target_os() == "Linux"
         
         # Some programs, like Evergreen, work much better if other tools are available.
         # If a project has a file listing extra dependencies (one per line), add them.
-        # Note that we deliberately don't use "Recommends" because people installing at the command-line won't follow your advice, and people installing from a GUI probably won't even see it.
         extra_depends_filename = "#{project_resource_directory}/lib/DEBIAN-control-Depends.txt"
         if File.exists?(extra_depends_filename)
             extra_depends = IO.readlines(extra_depends_filename).join(", ").gsub("\n", "")
             depends << ", " << extra_depends
+        end
+
+        # Recommend some useful packages that are not required.
+        recommends_filename = "#{project_resource_directory}/lib/DEBIAN-control-Recommends.txt"
+        recommends = ""
+        if File.exists?(recommends_filename)
+            recommends = IO.readlines(recommends_filename).join(", ").gsub("\n", "")
         end
         
         # Pull our build dependencies from a file rather than hard-coding them here.
@@ -359,6 +369,7 @@ if target_os() == "Linux"
         build_depends = IO.readlines(build_depends_filename).join(", ").gsub("\n", "")
         
         control.puts("Depends: #{depends}")
+        control.puts("Recommends: #{recommends}")
         control.puts("Build-Depends: #{build_depends}")
         control.puts("Installed-Size: #{installed_size}")
         control.puts("Maintainer: Alex Graveley <alex@beatniksoftware.com>")

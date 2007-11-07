@@ -21,8 +21,8 @@ public class HelpMenu {
         
         String webSiteAddress = AboutBox.getSharedInstance().getWebSiteAddress();
         if (webSiteAddress != null) {
-            menu.add(new WebLinkAction("View " + Log.getApplicationName() + " Change Log", webSiteAddress + "svn/trunk/ChangeLog"));
-            menu.add(new WebLinkAction("View " + Log.getApplicationName() + " FAQ", webSiteAddress + "faq.html"));
+            menu.add(new WebLinkAction("View " + Log.getApplicationName() + " Change Log", webSiteAddress + "/svn/trunk/ChangeLog"));
+            menu.add(new WebLinkAction("View " + Log.getApplicationName() + " FAQ", webSiteAddress + "/FAQ"));
             menu.addSeparator();
         }
         

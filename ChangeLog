@@ -1,3 +1,8 @@
+2008-02-12  Alex Graveley  <alex@beatniksoftware.com>
+
+	* src/e/ptextarea/PPaletteColor.java: Add this port of David
+	Trowbridge's libcontrast.
+
 2007-11-06  Alex Graveley  <alex@beatniksoftware.com>
 
 	* lib/DEBIAN-control-Recommends.txt: Move recommended packages to

@@ -64,6 +64,7 @@ public class PActionFactory {
     public static class FindNextAction extends PTextAction {
         public FindNextAction() {
             super("Find Next", e.util.GuiUtilities.makeKeyStroke("G", false));
+            GnomeStockIcon.useStockIcon(this, "gtk-go-forward");
         }
         
         public void performOn(PTextArea textArea) {
@@ -74,6 +75,7 @@ public class PActionFactory {
     public static class FindPreviousAction extends PTextAction {
         public FindPreviousAction() {
             super("Find Previous", e.util.GuiUtilities.makeKeyStroke("G", true));
+            GnomeStockIcon.useStockIcon(this, "gtk-go-back");
         }
         
         public void performOn(PTextArea textArea) {

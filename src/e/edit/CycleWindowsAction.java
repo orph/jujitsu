@@ -1,5 +1,6 @@
 package e.edit;
 
+import e.gui.*;
 import e.util.*;
 import java.awt.event.*;
 import javax.swing.*;
@@ -12,6 +13,8 @@ public class CycleWindowsAction extends ETextAction {
     
     public CycleWindowsAction(int indexDelta) {
         super((indexDelta == 1) ? "Next Buffer" : "Previous Buffer");
+        GnomeStockIcon.useStockIcon(this, (indexDelta == 1) ? "gtk-go-forward" : "gtk-go-back");
+        
         this.indexDelta = indexDelta;
         initKeyboardEquivalent();
     }
@@ -29,6 +32,8 @@ public class CycleWindowsAction extends ETextAction {
         // a workspace).
         
         // So, let's pretend everything's Mac OS...
+        // XXX: "TAB" here doesn't work, need to track that down
+        // String key = "TAB";
         String key = "BACK_QUOTE";
         boolean shifted = (indexDelta == -1);
         putValue(ACCELERATOR_KEY, GuiUtilities.makeKeyStroke(key, shifted));

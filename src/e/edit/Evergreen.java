@@ -494,7 +494,7 @@ public class Evergreen {
         }
         String question = "Close the project \"" + workspace.getTitle() + "\"?";
         if (workspace.isEmpty() == false) {
-            question += " Open windows will be moved to the next best workspace.";
+            question += " Open windows will be moved to the next best project.";
         }
         boolean remove = askQuestion("Close Project?", question, "Close");
         if (remove == false) {
